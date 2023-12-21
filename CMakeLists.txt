@@ -12,13 +12,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
-set(TS_FILES WorldConv_en_US.ts)
+set(TS_FILES resources/WorldConv_en_US.ts)
+
+file(GLOB UI_FILES resources/*.ui)
+
+file(GLOB_RECURSE SOURCE_FILES src/*)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        ${SOURCE_FILES}
+        ${UI_FILES}
         ${TS_FILES}
 )
 
@@ -26,17 +28,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(WorldConv
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        CColLib.h
-        CColLib.cpp
-        CIMG.h CIMG.cpp
-        CConverter.h CConverter.cpp        ILogger.h
-        CMapDataWriter.h CMapDataWriter.cpp
-        CMetaWriter.h CMetaWriter.cpp
-        CIplLoader.h CIplLoader.cpp
-        CIdeLoader.h CIdeLoader.cpp
-        CGtaDatLoader.h CGtaDatLoader.cpp
-        CLoader.h CLoader.cpp
-
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET WorldConv APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

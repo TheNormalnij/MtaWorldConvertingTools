@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "resources/ui_mainwindow.h"
 
 //#include "CConverter.h"
 
