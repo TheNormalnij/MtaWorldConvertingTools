@@ -4,8 +4,18 @@
 
 void CGtaDatLoader::Read()
 {
-    std::string buff(201, '\000');
-    while(m_stream.getline(buff.data(), 200)) {
+    std::string buff;
+
+    while(!m_stream.eof()) {
+        std::getline(m_stream, buff);
+        if (buff.empty()) {
+            break;
+        }
+
+        if (buff.ends_with('\r')) {
+            buff.resize(buff.size() - 1);
+        }
+
         if (buff.starts_with("IDE ")) {
             m_data.emplace_back(EDatType::IDE, &buff[4]);
         } else if (buff.starts_with("IPL ")) {
@@ -13,5 +23,6 @@ void CGtaDatLoader::Read()
         } else if (buff.starts_with("IMG ")) {
             m_data.emplace_back(EDatType::IMG, &buff[4]);
         }
+        buff.clear();
     }
 }

@@ -27,7 +27,5 @@ public:
     auto &GetFiles() const noexcept { return m_data; };
 
 private:
-    std::filesystem::path m_path;
-    std::ifstream m_stream;
     std::vector<SGtaDatSection> m_data;
 };

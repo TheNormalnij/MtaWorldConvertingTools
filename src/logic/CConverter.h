@@ -25,7 +25,7 @@ struct SConverterParams {
 class CConverter
 {
 public:
-    CConverter(ILogger *logger);
+    CConverter(ILogger *logger, SConverterParams &settings);
 
     void Convert();
 

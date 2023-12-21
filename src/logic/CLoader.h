@@ -6,7 +6,7 @@
 class CLoader
 {
 public:
-    CLoader(std::filesystem::path &&path): m_path(path) {};
+    CLoader(std::filesystem::path path): m_path(std::move(path)) {};
 
     bool Open();
     void Read() {};

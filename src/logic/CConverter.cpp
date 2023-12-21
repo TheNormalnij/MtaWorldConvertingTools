@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-CConverter::CConverter(ILogger *logger): m_log(logger) {
+CConverter::CConverter(ILogger *logger, SConverterParams &settings): m_log(logger), m_settings(settings) {
     m_usedImgs = 0;
 }
 
