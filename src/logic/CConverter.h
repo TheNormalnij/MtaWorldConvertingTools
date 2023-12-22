@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "CIdeLoader.h"
+#include "CGtaDatLoader.h"
 
 #include "ILogger.h"
 
@@ -40,9 +41,13 @@ private:
     void WriteMapInfo();
     void WriteMeta();
 
+    void MakePath(const fs::path &root, const std::string &add, fs::path &out);
+
 private:
     ILogger *m_log;
-    SConverterParams m_settings;
+    const SConverterParams m_settings;
+
+    std::vector<SGtaDatSection> m_modFiles;
 
     std::vector<std::string> m_modIdes;
     std::vector<std::string> m_modeIpls;

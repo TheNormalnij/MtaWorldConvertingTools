@@ -5,16 +5,16 @@
 #include <vector>
 
 struct SAtomicModelDef {
-    uint16_t modelId;
+    uint32_t modelId;
     char modelName[24];
     char texDictName[24];
-    uint16_t drawDist;
+    float drawDist;
     uint32_t flags;
 };
 
 struct STimeModelDef : SAtomicModelDef {
-    uint8_t on;
-    uint8_t off;
+    uint32_t on;
+    uint32_t off;
 };
 
 struct SClumpModelDef : SAtomicModelDef {

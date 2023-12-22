@@ -24,7 +24,7 @@ public:
 
     void Read();
 
-    auto &GetFiles() const noexcept { return m_data; };
+    auto &GetFiles() noexcept { return m_data; };
 
 private:
     std::vector<SGtaDatSection> m_data;

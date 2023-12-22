@@ -33,3 +33,12 @@ void CLoader::Close()
 {
     m_stream.close();
 }
+
+void CLoader::ReadLineWithoutCommas(std::string &buff)
+{
+    buff.clear();
+    std::getline(m_stream, buff);
+    for (auto &c : buff) {
+        c = c == ',' ? ' ' : c;
+    }
+}

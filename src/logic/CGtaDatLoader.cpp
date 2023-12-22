@@ -7,7 +7,7 @@ void CGtaDatLoader::Read()
     std::string buff;
 
     while(!m_stream.eof()) {
-        std::getline(m_stream, buff);
+        ReadLine(buff);
         if (buff.empty()) {
             break;
         }
