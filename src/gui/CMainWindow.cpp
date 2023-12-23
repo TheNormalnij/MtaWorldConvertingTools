@@ -32,7 +32,7 @@ CMainWindow::~CMainWindow()
 
 void CMainWindow::StartConverting()
 {
-    CConverter converter(m_guiLogger, m_params);
+    CConverter converter(m_guiLogger, m_settings);
     converter.Convert();
 }
 
@@ -44,20 +44,20 @@ void CMainWindow::SelectPath(fs::path &to, QString info, QLabel *label)
 }
 
 void CMainWindow::SelectGtaPath() {
-    SelectPath(m_params.gtaPath, tr("Select GTA SA folder"), ui->gta_path_final);
+    SelectPath(m_settings.gtaPath, tr("Select GTA SA folder"), ui->gta_path_final);
 }
 
 void CMainWindow::SelectModPath() {
-    SelectPath(m_params.modPath, tr("Select GTA mod folder"), ui->mod_path_final);
+    SelectPath(m_settings.modPath, tr("Select GTA mod folder"), ui->mod_path_final);
 }
 
 void CMainWindow::SelectOutputPath() {
-    SelectPath(m_params.outputPath, tr("Select output folder"), ui->output_path_final);
+    SelectPath(m_settings.outputPath, tr("Select output folder"), ui->output_path_final);
 }
 
 void CMainWindow::ApplyConfig()
 {
-    ui->gta_path_final->setText(m_params.gtaPath.c_str());
-    ui->mod_path_final->setText(m_params.modPath.c_str());
-    ui->output_path_final->setText(m_params.outputPath.c_str());
+    ui->gta_path_final->setText(m_settings.gtaPath.c_str());
+    ui->mod_path_final->setText(m_settings.modPath.c_str());
+    ui->output_path_final->setText(m_settings.outputPath.c_str());
 }

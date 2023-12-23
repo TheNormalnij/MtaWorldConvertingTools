@@ -70,21 +70,26 @@ bool CIMG::Open()
     return true;
 }
 
+bool CIMG::UnpackFile(const SImgFileInfo &info, std::vector<char> &buff)
+{
+    const size_t size = info.usSize * 2048;
+
+    buff.resize(size);
+
+    m_stream.seekg(info.uiOffset * 2048);
+
+    m_stream.read(buff.data(), size);
+
+    return true;
+}
+
 bool CIMG::UnpackFile(size_t pos, std::vector<char> &buff)
 {
     if (m_filesInfo.size() < pos) {
         return false;
     }
 
-    const size_t size = m_filesInfo[pos].usSize * 2048;
-
-    buff.resize(size);
-
-    m_stream.seekg(m_filesInfo[pos].uiOffset * 2048);
-
-    m_stream.read(buff.data(), size);
-
-    return true;
+    return UnpackFile(m_filesInfo[pos], buff);
 }
 
 bool CIMG::AddFile(std::string_view fileName, uint8_t *content, size_t count)

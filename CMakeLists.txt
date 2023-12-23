@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(WorldConv VERSION 0.1 LANGUAGES CXX)
+project(WorldConv VERSION 3.0 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -66,6 +66,11 @@ set_target_properties(WorldConv PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+target_compile_definitions(
+    WorldConv
+    PUBLIC
+        PROJECT_VEWSION=${PROJECT_VERSION})
 
 include(GNUInstallDirs)
 install(TARGETS WorldConv

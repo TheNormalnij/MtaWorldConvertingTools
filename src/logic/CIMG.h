@@ -27,6 +27,8 @@ public:
     bool Close();
 
     bool UnpackFile(size_t pos, std::vector<char> &buff);
+    bool UnpackFile(const SImgFileInfo &info, std::vector<char> &buff);
+
     bool AddFile(std::string_view fileName, uint8_t *content, size_t count);
 
     const char* GetContentFileName(size_t pos) const noexcept { return m_filesInfo[pos].szFileName; };
@@ -35,6 +37,8 @@ public:
     size_t GetSize() const noexcept;
 
     void PrepareHeader(size_t elementsCount);
+
+    auto &GetFilesInfo() const noexcept { return m_filesInfo; };
 private:
     void PrepareFileMap();
 

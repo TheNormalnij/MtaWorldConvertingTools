@@ -1,18 +1,5 @@
 #include "CMetaWriter.h"
 
-bool CMetaWriter::Create()
-{
-    m_stream.open(m_path);
-
-    if (!m_stream.is_open()) {
-        return false;
-    }
-
-    m_stream.clear();
-
-    return true;
-}
-
 void CMetaWriter::Write()
 {
     m_stream << "<meta>\n";
@@ -26,12 +13,6 @@ void CMetaWriter::Write()
     }
 
     m_stream << "</meta>\n";
-}
-
-void CMetaWriter::Close()
-{
-    m_stream.flush();
-    m_stream.close();
 }
 
 void CMetaWriter::AddFile(const char *name)

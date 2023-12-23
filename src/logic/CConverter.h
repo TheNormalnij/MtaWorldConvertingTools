@@ -2,10 +2,14 @@
 
 #include <filesystem>
 #include <vector>
+#include <list>
 
 #include "CIdeLoader.h"
 #include "CIplLoader.h"
 #include "CGtaDatLoader.h"
+#include "CIMG.h"
+
+#include "CColLib.h"
 
 #include "ILogger.h"
 
@@ -18,7 +22,7 @@ struct SConverterParams {
     bool genMeta;
     bool genRegister;
     bool packOneCol;
-    bool deleteLods;
+    bool removeLods;
     bool useLowerCase;
     bool optimiseModelsCount;
     bool checkCompability; // For engineLoadDFF
@@ -36,6 +40,14 @@ private:
     bool LoadModModelDefs();
     bool LoadModIpls();
 
+    void RemoveLods();
+    void FilterUnusedModels();
+
+    void OpenModIMGs();
+    void CloseModIMGs();
+
+    void GenerateColLib(CColLib &out);
+
     size_t WriteIMG();
     void WriteMapInfo();
     void WriteMeta();
@@ -52,7 +64,6 @@ private:
     std::vector<STimeModelDef> m_timed;
     std::vector<SClumpModelDef> m_clump;
 
-    std::vector<SIplInfo> m_modIpl;
-
-    size_t m_usedImgs;
+    std::vector<SIplInfo> m_modMap;
+    std::list<CIMG> m_modImgs;
 };

@@ -20,8 +20,6 @@ bool CLoader::Open()
         return false;
     }
 
-    //m_stream.open(m_path);
-
     if (!m_stream.is_open()) {
         return false;
     }

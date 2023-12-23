@@ -1,22 +1,17 @@
 #pragma once
 
-#include <filesystem>
-#include <string>
 #include <vector>
-#include <fstream>
 
-class CMetaWriter
+#include "CWriter.h"
+
+class CMetaWriter : public CWriter
 {
 public:
-    CMetaWriter(std::filesystem::path &path): m_path(path) {};
+    CMetaWriter(std::filesystem::path path): CWriter(std::move(path)) {};
 
-    bool Create();
     void Write();
-    void Close();
     void AddFile(const char* name);
 
 private:
-    std::filesystem::path  m_path;
     std::vector<std::string> m_files;
-    std::ofstream m_stream;
 };

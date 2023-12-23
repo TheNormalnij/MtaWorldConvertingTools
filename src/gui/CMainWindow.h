@@ -34,6 +34,6 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    SConverterParams m_params;
+    SConverterParams m_settings;
     CGuiTextBrowsertLogger *m_guiLogger;
 };
