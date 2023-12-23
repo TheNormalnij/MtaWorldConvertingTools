@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "CIdeLoader.h"
+#include "CIplLoader.h"
 #include "CGtaDatLoader.h"
 
 #include "ILogger.h"
@@ -29,8 +30,6 @@ public:
     CConverter(ILogger *logger, SConverterParams &settings);
 
     void Convert();
-
-
 private:
 
     bool LoadModGtaDat();
@@ -49,12 +48,11 @@ private:
 
     std::vector<SGtaDatSection> m_modFiles;
 
-    std::vector<std::string> m_modIdes;
-    std::vector<std::string> m_modeIpls;
-
     std::vector<SAtomicModelDef> m_atomic;
     std::vector<STimeModelDef> m_timed;
     std::vector<SClumpModelDef> m_clump;
+
+    std::vector<SIplInfo> m_modIpl;
 
     size_t m_usedImgs;
 };

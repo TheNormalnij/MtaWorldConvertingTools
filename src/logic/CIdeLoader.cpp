@@ -26,7 +26,6 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                         SAtomicModelDef def{};
                         const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d", &def.modelId, def.modelName, def.texDictName, &def.drawDist, &def.flags);
                         if (scanned != 5) {
-                            // TODO additional logic
                             continue;
                         }
 
@@ -37,7 +36,6 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                         STimeModelDef def{};
                         const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d %d %d", &def.modelId, def.modelName, def.texDictName, &def.drawDist, &def.flags, &def.on, &def.off);
                         if (scanned != 7) {
-                            // TODO additional logic
                             continue;
                         }
                         timed.emplace_back(std::move(def));
@@ -47,7 +45,6 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                         SClumpModelDef def{};
                         const auto scanned = sscanf(buff.c_str(), "%d %s %s %s %f %d", &def.modelId, def.modelName, def.texDictName, def.animName, &def.drawDist, &def.flags);
                         if (scanned != 6) {
-                            // TODO additional logic
                             continue;
                         }
                         clump.emplace_back(std::move(def));

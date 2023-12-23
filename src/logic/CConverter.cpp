@@ -17,12 +17,20 @@ void CConverter::Convert()
     m_log->Info("Start converting...");
 
     try {
+        // This fixes float values reading in sscanf
+        setlocale(LC_NUMERIC, "C");
+
         if (!LoadModGtaDat()) {
             m_log->Error("Stopped");
             return;
         }
 
         if (!LoadModModelDefs()) {
+            m_log->Error("Stopped");
+            return;
+        }
+
+        if (!LoadModIpls()) {
             m_log->Error("Stopped");
             return;
         }
@@ -72,7 +80,7 @@ bool CConverter::LoadModModelDefs()
         fs::path fullPath;
         MakePath(m_settings.modPath, filePathData.realtivePath, fullPath);
 
-        CIdeLoader ideLoader(std::move(fullPath), m_log);
+        CIdeLoader ideLoader(std::move(fullPath));
 
         if (!ideLoader.Open()) {
             std::string err = "Can not open mod IDE file: " + filePathData.realtivePath;
@@ -83,6 +91,34 @@ bool CConverter::LoadModModelDefs()
         ideLoader.Read(m_atomic, m_timed, m_clump);
 
         ideLoader.Close();
+    }
+
+    return true;
+}
+
+bool CConverter::LoadModIpls()
+{
+    m_log->Info("Load mod IPL's");
+
+    for (const auto &filePathData : m_modFiles) {
+        if (filePathData.type != EDatType::IPL) {
+            continue;
+        }
+
+        fs::path fullPath;
+        MakePath(m_settings.modPath, filePathData.realtivePath, fullPath);
+
+        CIplLoader iplLoader(std::move(fullPath));
+
+        if (!iplLoader.Open()) {
+            std::string err = "Can not open mod IPL file: " + filePathData.realtivePath;
+            m_log->Error(err.c_str());
+            return false;
+        }
+
+        iplLoader.Read(m_modIpl);
+
+        iplLoader.Close();
     }
 
     return true;

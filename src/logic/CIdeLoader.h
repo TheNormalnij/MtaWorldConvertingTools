@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CLoader.h"
-#include "ILogger.h"
 #include <vector>
 
 struct SAtomicModelDef {
@@ -24,9 +23,7 @@ struct SClumpModelDef : SAtomicModelDef {
 class CIdeLoader : public CLoader
 {
 public:
-    CIdeLoader(std::filesystem::path &&path, ILogger *log): CLoader(std::move(path)), m_log(log){};
+    CIdeLoader(std::filesystem::path &&path): CLoader(std::move(path)) {};
 
     void Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeModelDef> &timed, std::vector<SClumpModelDef> &clump);
-private:
-    ILogger *m_log;
 };
