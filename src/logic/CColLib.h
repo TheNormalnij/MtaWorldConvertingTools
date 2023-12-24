@@ -26,6 +26,7 @@ public:
     // Can do it better
     bool Unpack(CColLib &out, std::size_t offset);
 
+    const col_buff_t &GetData() const noexcept { return m_data; };
 private:
-    std::vector<char> m_data;
+    col_buff_t m_data;
 };

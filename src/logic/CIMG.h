@@ -20,23 +20,24 @@ struct SImgFileInfo
 class CIMG
 {
 public:
-    CIMG(fs::path &&path): m_path(std::move(path)){};
+    CIMG(fs::path path): m_path(std::move(path)){};
 
     bool Create();
     bool Open();
     bool Close();
 
     bool UnpackFile(size_t pos, std::vector<char> &buff);
-    bool UnpackFile(const SImgFileInfo &info, std::vector<char> &buff);
+    bool UnpackFile(const SImgFileInfo *info, std::vector<char> &buff);
 
-    bool AddFile(std::string_view fileName, uint8_t *content, size_t count);
+    bool AddFile(std::string_view fileName, const char *content, size_t count);
 
     const char* GetContentFileName(size_t pos) const noexcept { return m_filesInfo[pos].szFileName; };
     size_t GetFilesCount() const noexcept { return m_filesCount; };
 
-    size_t GetSize() const noexcept;
+    // Why can't i use const here?
+    const SImgFileInfo *GetFileInfo(const char* name) { return m_fileMap[name]; };
 
-    void PrepareHeader(size_t elementsCount);
+    size_t GetSize() const noexcept;
 
     auto &GetFilesInfo() const noexcept { return m_filesInfo; };
 private:

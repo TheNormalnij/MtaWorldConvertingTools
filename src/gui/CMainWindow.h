@@ -6,6 +6,7 @@
 
 #include "CGuiTextBrowsertLogger.h"
 #include "../logic/CConverter.h"
+#include "CConvertWorkingThread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,6 +25,7 @@ public:
 
 private slots:
     void StartConverting();
+    void OnConvertingFinished();
     void SelectGtaPath();
     void SelectModPath();
     void SelectOutputPath();
@@ -36,4 +38,6 @@ private:
     Ui::MainWindow *ui;
     SConverterParams m_settings;
     CGuiTextBrowsertLogger *m_guiLogger;
+
+    CConvertWorkingThread *m_workThread;
 };

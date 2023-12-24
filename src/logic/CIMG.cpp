@@ -70,13 +70,19 @@ bool CIMG::Open()
     return true;
 }
 
-bool CIMG::UnpackFile(const SImgFileInfo &info, std::vector<char> &buff)
+bool CIMG::Close()
 {
-    const size_t size = info.usSize * 2048;
+    m_stream.close();
+    return true;
+}
+
+bool CIMG::UnpackFile(const SImgFileInfo *info, std::vector<char> &buff)
+{
+    const size_t size = info->usSize * 2048;
 
     buff.resize(size);
 
-    m_stream.seekg(info.uiOffset * 2048);
+    m_stream.seekg(info->uiOffset * 2048);
 
     m_stream.read(buff.data(), size);
 
@@ -89,10 +95,10 @@ bool CIMG::UnpackFile(size_t pos, std::vector<char> &buff)
         return false;
     }
 
-    return UnpackFile(m_filesInfo[pos], buff);
+    return UnpackFile(&m_filesInfo[pos], buff);
 }
 
-bool CIMG::AddFile(std::string_view fileName, uint8_t *content, size_t count)
+bool CIMG::AddFile(std::string_view fileName, const char *content, size_t count)
 {
     if (fileName.size() > 24) {
         return false;
@@ -104,12 +110,6 @@ bool CIMG::AddFile(std::string_view fileName, uint8_t *content, size_t count)
 size_t CIMG::GetSize() const noexcept
 {
     return 0;
-}
-
-void CIMG::PrepareHeader(size_t elementsCount)
-{
-    m_filesInfo.reserve(elementsCount);
-    //m_startOffset =
 }
 
 void CIMG::PrepareFileMap()

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <vector>
 #include <list>
+#include <unordered_set>
 
 #include "CIdeLoader.h"
 #include "CIplLoader.h"
@@ -31,7 +32,7 @@ struct SConverterParams {
 class CConverter
 {
 public:
-    CConverter(ILogger *logger, SConverterParams &settings);
+    CConverter(ILogger *logger, SConverterParams *settings);
 
     void Convert();
 private:
@@ -46,8 +47,11 @@ private:
     void OpenModIMGs();
     void CloseModIMGs();
 
-    void GenerateColLib(CColLib &out);
+    void GenerateColLib();
 
+    void GetUsedTxd(std::unordered_set<std::string> &out);
+
+    void WriteIMGs();
     size_t WriteIMG();
     void WriteMapInfo();
     void WriteMeta();
@@ -66,4 +70,8 @@ private:
 
     std::vector<SIplInfo> m_modMap;
     std::list<CIMG> m_modImgs;
+
+    CColLib m_cols;
+
+    std::unordered_set<std::string> m_usedModels;
 };

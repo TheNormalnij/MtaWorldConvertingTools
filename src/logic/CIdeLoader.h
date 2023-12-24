@@ -5,8 +5,8 @@
 
 struct SAtomicModelDef {
     uint32_t modelId;
-    char modelName[24];
-    char texDictName[24];
+    char modelName[20];
+    char texDictName[20];
     float drawDist;
     uint32_t flags;
 };

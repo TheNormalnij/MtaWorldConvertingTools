@@ -15,9 +15,11 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(ui->BtnSelectModPath, SIGNAL(clicked()), this, SLOT(SelectModPath()));
     connect(ui->BtnSelectOutPath, SIGNAL(clicked()), this, SLOT(SelectOutputPath()));
 
-
+    m_workThread = nullptr;
     m_guiLogger = new CGuiTextBrowsertLogger(ui->Log);
 
+    m_settings.modPath = "/mnt/win/Games/GTA CCD";
+    m_settings.removeLods = true;
 
     ApplyConfig();
 
@@ -28,12 +30,31 @@ CMainWindow::~CMainWindow()
 {
     delete ui;
     delete m_guiLogger;
+    if (m_workThread) {
+        delete m_workThread;
+    }
 }
 
 void CMainWindow::StartConverting()
 {
-    CConverter converter(m_guiLogger, m_settings);
-    converter.Convert();
+    if (m_workThread != nullptr) {
+        if (m_workThread->isRunning()) {
+            m_guiLogger->Warning("Can not start");
+            return;
+        }
+    }
+
+    m_workThread = new CConvertWorkingThread(m_guiLogger, m_settings);
+
+    connect(m_workThread, SIGNAL(finished()), this, SLOT(OnConvertingFinished()));
+
+    m_workThread->start();
+}
+
+void CMainWindow::OnConvertingFinished()
+{
+    m_guiLogger->Info("Converting thread finished");
+    delete m_workThread;
 }
 
 void CMainWindow::SelectPath(fs::path &to, QString info, QLabel *label)

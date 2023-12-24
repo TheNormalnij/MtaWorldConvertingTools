@@ -5,7 +5,7 @@
 
 struct SIplInfo {
     uint32_t modelId;
-    char modelName[24];
+    char modelName[20];
     uint32_t interior;
     float x;
     float y;

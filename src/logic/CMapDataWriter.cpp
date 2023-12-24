@@ -22,10 +22,7 @@ void CMapDataWriter::Write(std::vector<SIplInfo> &ipl)
 
     // Map
     m_stream << "\tmap = {\n";
-    // for (const SIplInfo &item : ipl) {
-    //     m_stream << "\t\t{" << item.modelId << ", " << item.x << ", " << item.y << ", "
-    //              << item.z << ", " << item.interior;
-    // }
+
     m_stream << "\t};\n";
 
     // Water

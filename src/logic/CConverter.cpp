@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include "CMapDataWriter.h"
 #include "CMetaWriter.h"
+#include "CImgRepacker.h"
 
 #ifndef _WIN32
     #include "CPathResolver.h"
@@ -10,7 +11,7 @@
 
 namespace fs = std::filesystem;
 
-CConverter::CConverter(ILogger *logger, SConverterParams &settings): m_log(logger), m_settings(settings) {
+CConverter::CConverter(ILogger *logger, SConverterParams *settings): m_log(logger), m_settings(*settings) {
 }
 
 void CConverter::Convert()
@@ -42,10 +43,11 @@ void CConverter::Convert()
 
         FilterUnusedModels();
 
+        GenerateColLib();
+
         OpenModIMGs();
 
-        CColLib colLib;
-        GenerateColLib(colLib);
+        WriteIMGs();
 
         CloseModIMGs();
 
@@ -146,7 +148,7 @@ void CConverter::RemoveLods()
     m_log->Info("Remove LOD's");
     std::vector<SIplInfo> filtered;
 
-    for (size_t i = m_modMap.size(); i >= 0; i--) {
+    for (int i = m_modMap.size(); i >= 0; i--) {
         const auto lod = m_modMap[i].lod;
         if (lod != -1) {
             m_modMap[lod].modelId = 0;
@@ -169,19 +171,20 @@ void CConverter::FilterUnusedModels()
         usedSet.insert(posInfo.modelId);
     }
 
-    std::vector<SAtomicModelDef> atomic;
-    std::vector<STimeModelDef> timed;
-    std::vector<SClumpModelDef> clump;
-
-    for (const auto &def : m_atomic) {
-        if (usedSet.contains(def.modelId)) {
-            atomic.emplace_back(def);
+    auto filter = [&](auto &container) {
+        typeof(container) temp;
+        for (const auto &def : container) {
+            if (usedSet.contains(def.modelId)) {
+                temp.emplace_back(def);
+                m_usedModels.insert(std::string(&def.modelName[0], &def.modelName[20]));
+            }
         }
-    }
+        container.swap(temp);
+    };
 
-    m_atomic.swap(atomic);
-    m_timed.swap(timed);
-    m_clump.swap(clump);
+    filter(m_atomic);
+    filter(m_timed);
+    filter(m_clump);
 }
 
 void CConverter::OpenModIMGs()
@@ -217,6 +220,7 @@ void CConverter::OpenModIMGs()
 
 void CConverter::CloseModIMGs()
 {
+    m_log->Info("Close mod IMG's");
     for (CIMG &img : m_modImgs) {
         img.Close();
     }
@@ -224,15 +228,13 @@ void CConverter::CloseModIMGs()
     m_modImgs.clear();
 }
 
-void CConverter::GenerateColLib(CColLib &out)
+void CConverter::GenerateColLib()
 {
     m_log->Info("Generate col lib");
 
     std::unordered_set<std::string> usedModels;
 
     std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> colMap;
-
-    CColLib allColLib{};
 
     for (CIMG &img : m_modImgs) {
         for (const SImgFileInfo &fileInfo : img.GetFilesInfo()) {
@@ -243,7 +245,7 @@ void CConverter::GenerateColLib(CColLib &out)
             }
 
             std::vector<char> buff;
-            img.UnpackFile(fileInfo, buff);
+            img.UnpackFile(&fileInfo, buff);
 
             CColLib imgCol(std::move(buff));
 
@@ -257,11 +259,9 @@ void CConverter::GenerateColLib(CColLib &out)
                     offset += out.GetSize();
 
                     std::string modelName(out.GetName());
-                    modelName.shrink_to_fit();
-
                     if (usedModels.contains(modelName)) {
-                        const size_t from = allColLib.GetSize();
-                        allColLib.Add(out);
+                        const size_t from = m_cols.GetSize();
+                        m_cols.Add(out);
                         colMap[modelName] = {from, offset};
                     }
                 };
@@ -269,6 +269,56 @@ void CConverter::GenerateColLib(CColLib &out)
                 break;
             }
 
+        }
+    }
+}
+
+void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
+{
+    auto filter = [&](auto &container) {
+        for (const auto &def : container) {
+            out.insert(def.texDictName);
+        }
+    };
+
+    filter(m_atomic);
+    filter(m_timed);
+    filter(m_clump);
+}
+
+void CConverter::WriteIMGs()
+{
+    m_log->Info("Starting repack IMGs");
+
+    CImgRepacker imgRepacker(m_settings.outputPath);
+
+    for (CIMG &img : m_modImgs) {
+        imgRepacker.AddImportedImg(&img);
+    }
+
+    // Pack col library
+    if (!imgRepacker.AddFile("allmapcolls.col", m_cols.GetData()) ) {
+        m_log->Error("Can not write allmapcolls.col in IMG");
+    }
+
+    std::unordered_set<std::string> usedTxds{};
+    GetUsedTxd(usedTxds);
+
+    // Pack txd's
+    for (std::string name : usedTxds) {
+        name.shrink_to_fit();
+        name.append(".txd");
+        if (!imgRepacker.ExportFile(name.c_str())) {
+            m_log->Error(std::string("Error writing: " + name).c_str());
+        }
+    }
+
+    // Pack dff's
+    for (std::string name : m_usedModels) {
+        name.shrink_to_fit();
+        name.append(".dff");
+        if (!imgRepacker.ExportFile(name.c_str())) {
+            m_log->Error(std::string("Error writing: " + name).c_str());
         }
     }
 }
