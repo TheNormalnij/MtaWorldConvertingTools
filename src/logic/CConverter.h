@@ -44,7 +44,7 @@ private:
     void RemoveLods();
     void FilterUnusedModels();
 
-    void OpenModIMGs();
+    bool OpenModIMGs();
     void CloseModIMGs();
 
     void GenerateColLib();
@@ -69,6 +69,7 @@ private:
     std::vector<SClumpModelDef> m_clump;
 
     std::vector<SIplInfo> m_modMap;
+    std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> m_colMap;
     std::list<CIMG> m_modImgs;
 
     CColLib m_cols;

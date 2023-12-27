@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>512</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,13 +21,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>450</width>
+    <height>420</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>999999</width>
+    <width>450</width>
     <height>999999</height>
    </size>
   </property>
@@ -41,8 +44,8 @@
    <widget class="QLabel" name="log_label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>260</y>
+      <x>20</x>
+      <y>150</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -54,8 +57,8 @@
    <widget class="QPushButton" name="BtnConvert">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>230</y>
+      <x>350</x>
+      <y>140</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -209,10 +212,62 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>290</y>
+      <y>180</y>
       <width>431</width>
-      <height>192</height>
+      <height>211</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>210</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="sizeIncrement">
+     <size>
+      <width>0</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <family>FreeMono</family>
+      <bold>true</bold>
+     </font>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="ChkRemoveLods">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove LOD's</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>

@@ -10,7 +10,31 @@ struct SImgHeader
 
 bool CIMG::Create()
 {
-    return false;
+    if (!m_filesInfo.empty())
+        return false;
+
+    if (m_stream.is_open())
+        return false;
+
+    if (m_path.empty())
+        return false;
+
+    if (fs::exists(m_path))
+        return false;
+
+    m_stream = std::fstream(m_path, std::ios_base::binary | std::ios_base::out);
+
+    // Open the file
+    if (m_stream.fail())
+    {
+        m_stream.close();
+        return false;
+    }
+
+    // Write empty header
+    m_stream.write("VER2\000\000\000\000", 8);
+
+    return true;
 }
 
 bool CIMG::Open()
@@ -28,7 +52,7 @@ bool CIMG::Open()
     if (!fs::exists(m_path))
         return false;
 
-    m_stream = std::ifstream(m_path, std::ios::binary);
+    m_stream = std::fstream(m_path, std::ios_base::binary | std::ios_base::in);
 
     // Open the file
     if (m_stream.fail())

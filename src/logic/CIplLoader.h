@@ -14,7 +14,7 @@ struct SIplInfo {
     float ry;
     float rz;
     float rw;
-    uint32_t lod;
+    int32_t lod;
 };
 
 class CIplLoader : public CLoader

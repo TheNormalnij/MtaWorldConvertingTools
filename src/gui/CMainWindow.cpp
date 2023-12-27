@@ -42,7 +42,11 @@ void CMainWindow::StartConverting()
             m_guiLogger->Warning("Can not start");
             return;
         }
+
+        delete m_workThread;
     }
+
+    ui->Log->clear();
 
     m_workThread = new CConvertWorkingThread(m_guiLogger, m_settings);
 
@@ -55,6 +59,7 @@ void CMainWindow::OnConvertingFinished()
 {
     m_guiLogger->Info("Converting thread finished");
     delete m_workThread;
+    m_workThread = nullptr;
 }
 
 void CMainWindow::SelectPath(fs::path &to, QString info, QLabel *label)
@@ -81,4 +86,6 @@ void CMainWindow::ApplyConfig()
     ui->gta_path_final->setText(m_settings.gtaPath.c_str());
     ui->mod_path_final->setText(m_settings.modPath.c_str());
     ui->output_path_final->setText(m_settings.outputPath.c_str());
+
+    ui->ChkRemoveLods->setCheckState(m_settings.removeLods ? Qt::Checked : Qt::Unchecked);
 }

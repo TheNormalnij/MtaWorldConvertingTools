@@ -23,17 +23,17 @@ void CConverter::Convert()
         setlocale(LC_NUMERIC, "C");
 
         if (!LoadModGtaDat()) {
-            m_log->Error("Stopped");
+            m_log->Error("Can not continue without gta.dat");
             return;
         }
 
         if (!LoadModModelDefs()) {
-            m_log->Error("Stopped");
+            m_log->Error("Can not continue without all mod IDE's");
             return;
         }
 
         if (!LoadModIpls()) {
-            m_log->Error("Stopped");
+            m_log->Error("Can not continue without all mod IPL's");
             return;
         }
 
@@ -43,9 +43,12 @@ void CConverter::Convert()
 
         FilterUnusedModels();
 
-        GenerateColLib();
+        if (!OpenModIMGs()){
+            m_log->Error("Can not continue without mod IMG's");
+            return;
+        }
 
-        OpenModIMGs();
+        GenerateColLib();
 
         WriteIMGs();
 
@@ -57,7 +60,7 @@ void CConverter::Convert()
             WriteMeta();
         }
     } catch (...) {
-        m_log->Error("Runtime error");
+        m_log->Error("Unknown error");
     }
 
     m_log->Info("Finished");
@@ -80,8 +83,7 @@ bool CConverter::LoadModGtaDat()
 
     m_modFiles.swap(datLoader.GetFiles());
 
-    std::string msg = "Readed " + std::to_string(m_modFiles.size()) + " lines from mod gta.dat";
-    m_log->Verbose(msg.c_str());
+    m_log->Verbose("Readed %d lines from mod gta.dat", m_modFiles.size());
 
     return true;
 }
@@ -101,8 +103,7 @@ bool CConverter::LoadModModelDefs()
         CIdeLoader ideLoader(std::move(fullPath));
 
         if (!ideLoader.Open()) {
-            std::string err = "Can not open mod IDE file: " + filePathData.realtivePath;
-            m_log->Error(err.c_str());
+            m_log->Error( "Can not open mod IDE file: %s", &filePathData.realtivePath);
             return false;
         }
 
@@ -110,6 +111,8 @@ bool CConverter::LoadModModelDefs()
 
         ideLoader.Close();
     }
+
+    m_log->Verbose("Total loaded model defs: atomic %d, timed %d, clump %d", m_atomic.size(), m_timed.size(), m_clump.size());
 
     return true;
 }
@@ -160,11 +163,14 @@ void CConverter::RemoveLods()
     }
 
     m_modMap.swap(filtered);
+
+    std::string info = "Removed lods count: " + std::to_string((filtered.size() - m_modMap.size()));
+    m_log->Verbose((info.c_str()));
 }
 
 void CConverter::FilterUnusedModels()
 {
-    m_log->Info("Load mod IDE's");
+    m_log->Info("Filter unused model def's");
 
     std::unordered_set<uint32_t> usedSet;
     for (const auto &posInfo : m_modMap) {
@@ -185,19 +191,21 @@ void CConverter::FilterUnusedModels()
     filter(m_atomic);
     filter(m_timed);
     filter(m_clump);
+
+    m_log->Verbose("Used models count: %d", usedSet.size());
 }
 
-void CConverter::OpenModIMGs()
+bool CConverter::OpenModIMGs()
 {
     m_log->Info("Open mod IMG's");
 
     fs::path path;
-    MakePath(m_settings.gtaPath, "models\\gta3.img", path);
+    MakePath(m_settings.modPath, "models\\gta3.img", path);
 
     CIMG &img = m_modImgs.emplace_back(path);
     if (!img.Open()) {
         m_log->Error("Can not open mod gta3.img");
-        return;
+        return false;
     }
 
     for (const auto &filePathData : m_modFiles) {
@@ -211,11 +219,12 @@ void CConverter::OpenModIMGs()
         CIMG &img = m_modImgs.emplace_back(path);
 
         if (!img.Open()) {
-            std::string err = "Can not open mod IMG file: " + filePathData.realtivePath;
-            m_log->Error(err.c_str());
-            return;
+            m_log->Error("Can not open mod IMG file: %s", filePathData.realtivePath.c_str());
+            return false;
         }
     }
+
+    return true;
 }
 
 void CConverter::CloseModIMGs()
@@ -232,15 +241,11 @@ void CConverter::GenerateColLib()
 {
     m_log->Info("Generate col lib");
 
-    std::unordered_set<std::string> usedModels;
-
-    std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> colMap;
-
     for (CIMG &img : m_modImgs) {
         for (const SImgFileInfo &fileInfo : img.GetFilesInfo()) {
             auto name = std::string_view(fileInfo.szFileName, 24);
             // TODO end with
-            if (name.find(".col") != name.npos) {
+            if (name.find(".col") == name.npos) {
                 continue;
             }
 
@@ -259,18 +264,22 @@ void CConverter::GenerateColLib()
                     offset += out.GetSize();
 
                     std::string modelName(out.GetName());
-                    if (usedModels.contains(modelName)) {
+                    modelName.resize(20);
+                    if (m_usedModels.contains(modelName)) {
                         const size_t from = m_cols.GetSize();
                         m_cols.Add(out);
-                        colMap[modelName] = {from, offset};
+                        m_colMap[modelName] = {from, offset};
                     }
-                };
+                } else {
+                    break;
+                }
 
-                break;
             }
 
         }
     }
+
+    m_log->Verbose("Total col's count: %d", m_colMap.size());
 }
 
 void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
@@ -297,9 +306,14 @@ void CConverter::WriteIMGs()
     }
 
     // Pack col library
-    if (!imgRepacker.AddFile("allmapcolls.col", m_cols.GetData()) ) {
-        m_log->Error("Can not write allmapcolls.col in IMG");
+    if (m_cols.GetSize() > 0) {
+        if (!imgRepacker.AddFile("allmapcolls.col", m_cols.GetData()) ) {
+            m_log->Error("Can not write allmapcolls.col in IMG");
+        }
+    } else {
+        m_log->Warning("Skip empty allmapcolls.col");
     }
+
 
     std::unordered_set<std::string> usedTxds{};
     GetUsedTxd(usedTxds);
@@ -309,7 +323,7 @@ void CConverter::WriteIMGs()
         name.shrink_to_fit();
         name.append(".txd");
         if (!imgRepacker.ExportFile(name.c_str())) {
-            m_log->Error(std::string("Error writing: " + name).c_str());
+            m_log->Error("Error writing: %s", name);
         }
     }
 
@@ -318,7 +332,7 @@ void CConverter::WriteIMGs()
         name.shrink_to_fit();
         name.append(".dff");
         if (!imgRepacker.ExportFile(name.c_str())) {
-            m_log->Error(std::string("Error writing: " + name).c_str());
+            m_log->Error("Error writing: %s", name);
         }
     }
 }

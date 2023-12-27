@@ -2,7 +2,7 @@
 
 bool CColLib::Unpack(CColLib &out, std::size_t offset)
 {
-    if (m_data.size() < offset) {
+    if (m_data.size() <= offset) {
         return false;
     }
 
@@ -10,6 +10,10 @@ bool CColLib::Unpack(CColLib &out, std::size_t offset)
 
     const std::size_t end = header.size + offset + sizeof(SColHeader::size) + sizeof(SColHeader::version);
     if (end > m_data.size()) {
+        return false;
+    }
+
+    if (header.version[0] != 'C' || header.version[1] != 'O' || header.version[2] != 'L') {
         return false;
     }
 

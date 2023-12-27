@@ -44,7 +44,7 @@ private:
     void PrepareFileMap();
 
 private:
-    std::ifstream m_stream;
+    std::fstream m_stream;
     fs::path m_path;
     size_t m_filesCount;
     size_t m_startOffset;
