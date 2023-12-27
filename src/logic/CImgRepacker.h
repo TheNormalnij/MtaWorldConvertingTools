@@ -8,6 +8,10 @@ class CImgRepacker
 {
 public:
     CImgRepacker(std::filesystem::path path);
+    ~CImgRepacker();
+
+    bool Create();
+    void Close();
 
     void AddImportedImg(CIMG *img) { m_import.push_back(img); };
 

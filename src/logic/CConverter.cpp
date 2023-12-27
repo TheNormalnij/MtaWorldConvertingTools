@@ -301,6 +301,11 @@ void CConverter::WriteIMGs()
 
     CImgRepacker imgRepacker(m_settings.outputPath);
 
+    if (!imgRepacker.Create()) {
+        m_log->Error("Can not create IMG output files");
+        return;
+    }
+
     for (CIMG &img : m_modImgs) {
         imgRepacker.AddImportedImg(&img);
     }
@@ -313,7 +318,6 @@ void CConverter::WriteIMGs()
     } else {
         m_log->Warning("Skip empty allmapcolls.col");
     }
-
 
     std::unordered_set<std::string> usedTxds{};
     GetUsedTxd(usedTxds);
@@ -335,6 +339,9 @@ void CConverter::WriteIMGs()
             m_log->Error("Error writing: %s", name);
         }
     }
+
+
+    imgRepacker.Close();
 }
 
 void CConverter::WriteMapInfo()

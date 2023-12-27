@@ -1,9 +1,31 @@
 #include "CImgRepacker.h"
 
-CImgRepacker::CImgRepacker(std::filesystem::path path): m_outputPath(std::move(path)) {
+CImgRepacker::CImgRepacker(std::filesystem::path path): m_outputPath(std::move(path)), m_currentOutput(nullptr) {
+
+}
+
+CImgRepacker::~CImgRepacker()
+{
+    Close();
+}
+
+bool CImgRepacker::Create()
+{
+    if (m_currentOutput) {
+        return false;
+    }
+
     m_currentOutput = new CIMG(std::move(m_outputPath / "world1.img"));
 
-    m_currentOutput->Create();
+    return m_currentOutput->Create();
+}
+
+void CImgRepacker::Close()
+{
+    if (m_currentOutput) {
+        m_currentOutput->Close();
+        m_currentOutput = nullptr;
+    }
 }
 
 bool CImgRepacker::AddFile(const char* name, const std::vector<char> &buff)
