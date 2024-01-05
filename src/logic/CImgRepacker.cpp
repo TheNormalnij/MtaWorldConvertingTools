@@ -33,7 +33,7 @@ bool CImgRepacker::AddFile(const char* name, const std::vector<char> &buff)
     return m_currentOutput->AddFile(name, buff.data(), buff.size());
 }
 
-bool CImgRepacker::ExportFile(const char* name)
+bool CImgRepacker::ExportFile(std::string &name)
 {
     const SImgFileInfo *fileInfo = nullptr;
     CIMG *sourceImg = nullptr;
@@ -53,5 +53,6 @@ bool CImgRepacker::ExportFile(const char* name)
     buff.resize(fileInfo->usSize * 2048);
     sourceImg->UnpackFile(fileInfo, buff);
 
-    return m_currentOutput->AddFile(fileInfo->szFileName, buff.data(), buff.size());
+    std::string fileName = fileInfo->szFileName.GetLowerString();
+    return m_currentOutput->AddFile(fileName, buff.data(), buff.size());
 }

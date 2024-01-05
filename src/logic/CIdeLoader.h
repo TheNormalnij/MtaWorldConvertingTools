@@ -2,11 +2,12 @@
 
 #include "CLoader.h"
 #include <vector>
+#include "CArrayStr.h"
 
 struct SAtomicModelDef {
     uint32_t modelId;
-    char modelName[20];
-    char texDictName[20];
+    CArrayStr<20> modelName;
+    CArrayStr<20> texDictName;
     float drawDist;
     uint32_t flags;
 };
@@ -17,7 +18,7 @@ struct STimeModelDef : SAtomicModelDef {
 };
 
 struct SClumpModelDef : SAtomicModelDef {
-    char animName[24];
+    CArrayStr<20> animName;
 };
 
 class CIdeLoader : public CLoader

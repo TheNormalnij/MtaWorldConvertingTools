@@ -24,7 +24,7 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                 switch (mode) {
                     case IDE_READ_MODE::OBJ: {
                         SAtomicModelDef def{};
-                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d", &def.modelId, def.modelName, def.texDictName, &def.drawDist, &def.flags);
+                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d", &def.modelId, def.modelName.data(), def.texDictName.data(), &def.drawDist, &def.flags);
                         if (scanned != 5) {
                             continue;
                         }
@@ -34,7 +34,7 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                     }
                     case IDE_READ_MODE::TOBJ: {
                         STimeModelDef def{};
-                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d %d %d", &def.modelId, def.modelName, def.texDictName, &def.drawDist, &def.flags, &def.on, &def.off);
+                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %f %d %d %d", &def.modelId, def.modelName.data(), def.texDictName.data(), &def.drawDist, &def.flags, &def.on, &def.off);
                         if (scanned != 7) {
                             continue;
                         }
@@ -43,7 +43,7 @@ void CIdeLoader::Read(std::vector<SAtomicModelDef> &atomic, std::vector<STimeMod
                     }
                     case IDE_READ_MODE::ANIM: {
                         SClumpModelDef def{};
-                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %s %f %d", &def.modelId, def.modelName, def.texDictName, def.animName, &def.drawDist, &def.flags);
+                        const auto scanned = sscanf(buff.c_str(), "%d %s %s %s %f %d", &def.modelId, def.modelName.data(), def.texDictName.data(), def.animName.data(), &def.drawDist, &def.flags);
                         if (scanned != 6) {
                             continue;
                         }

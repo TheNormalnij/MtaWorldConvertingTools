@@ -17,7 +17,7 @@ public:
 
     bool AddFile(const char* name, const std::vector<char> &buff);
 
-    bool ExportFile(const char* name);
+    bool ExportFile(std::string &name);
 
 private:
     const std::filesystem::path m_outputPath;

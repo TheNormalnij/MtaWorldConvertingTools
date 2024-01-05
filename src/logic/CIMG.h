@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
+#include "CArrayStr.h"
 
 namespace fs = std::filesystem;
 
@@ -14,7 +15,7 @@ struct SImgFileInfo
     unsigned int   uiOffset;
     unsigned short usSize;
     unsigned short usUnpackedSize;
-    char           szFileName[24];
+    CArrayStr<24>  szFileName;
 };
 
 class CIMG
@@ -30,12 +31,10 @@ public:
     bool UnpackFile(const SImgFileInfo *info, std::vector<char> &buff);
 
     bool AddFile(std::string_view fileName, const char *content, size_t count);
-
-    const char* GetContentFileName(size_t pos) const noexcept { return m_filesInfo[pos].szFileName; };
     size_t GetFilesCount() const noexcept { return m_filesInfo.size(); };
 
-    // Why can't i use const here?
     const SImgFileInfo *GetFileInfo(const char* name) { return m_fileMap[name]; };
+    const SImgFileInfo *GetFileInfo(std::string &name) { return m_fileMap[name]; };
 
     size_t GetSize();
 

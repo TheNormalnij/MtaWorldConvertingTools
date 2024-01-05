@@ -167,7 +167,7 @@ bool CIMG::AddFile(std::string_view fileName, const char *content, size_t count)
     fileInfo.usSize = count / BLOCK_SIZE;
     fileInfo.usUnpackedSize = fileInfo.usSize;
 
-    std::memcpy(fileInfo.szFileName, fileName.data(), fileName.size());
+    std::memcpy(&fileInfo.szFileName, fileName.data(), fileName.size());
 
     m_filesInfo.emplace_back(std::move(fileInfo));
 
@@ -183,7 +183,7 @@ size_t CIMG::GetSize()
 void CIMG::PrepareFileMap()
 {
     for (auto &item : m_filesInfo) {
-        m_fileMap[item.szFileName] = &item;
+        m_fileMap[item.szFileName.GetLowerString()] = &item;
     }
 }
 

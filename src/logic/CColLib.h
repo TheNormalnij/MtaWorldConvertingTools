@@ -3,11 +3,12 @@
 
 #include <vector>
 #include <cstdint>
+#include "CArrayStr.h"
 
 struct SColHeader {
     char version[4]; // COL3...
     uint32_t size;
-    char name[20];
+    CArrayStr<20> name;
 };
 
 typedef std::vector<char> col_buff_t;

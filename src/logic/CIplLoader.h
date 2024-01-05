@@ -2,10 +2,11 @@
 
 #include "CLoader.h"
 #include <vector>
+#include "CArrayStr.h"
 
 struct SIplInfo {
     uint32_t modelId;
-    char modelName[20];
+    CArrayStr<20> modelName;
     uint32_t interior;
     float x;
     float y;

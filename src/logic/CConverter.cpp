@@ -27,6 +27,10 @@ void CConverter::Convert()
             return;
         }
 
+        // Default files
+        m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta3.img"));
+        m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta_int.img"));
+
         if (!LoadModModelDefs()) {
             m_log->Error("Can not continue without all mod IDE's");
             return;
@@ -182,7 +186,7 @@ void CConverter::FilterUnusedModels()
         for (const auto &def : container) {
             if (usedSet.contains(def.modelId)) {
                 temp.emplace_back(def);
-                m_usedModels.insert(std::string(&def.modelName[0], &def.modelName[20]));
+                m_usedModels.insert(std::move(def.modelName.GetLowerString()));
             }
         }
         container.swap(temp);
@@ -199,21 +203,12 @@ bool CConverter::OpenModIMGs()
 {
     m_log->Info("Open mod IMG's");
 
-    fs::path path;
-    MakePath(m_settings.modPath, "models\\gta3.img", path);
-
-    CIMG &img = m_modImgs.emplace_back(path);
-    if (!img.Open()) {
-        m_log->Error("Can not open mod gta3.img");
-        return false;
-    }
-
     for (const auto &filePathData : m_modFiles) {
         if (filePathData.type != EDatType::IMG) {
             continue;
         }
 
-        path.clear();
+        fs::path path;
         MakePath(m_settings.modPath, filePathData.realtivePath, path);
 
         CIMG &img = m_modImgs.emplace_back(path);
@@ -243,7 +238,7 @@ void CConverter::GenerateColLib()
 
     for (CIMG &img : m_modImgs) {
         for (const SImgFileInfo &fileInfo : img.GetFilesInfo()) {
-            auto name = std::string_view(fileInfo.szFileName, 24);
+            auto name = fileInfo.szFileName.GetLowerString();
             // TODO end with
             if (name.find(".col") == name.npos) {
                 continue;
@@ -263,8 +258,7 @@ void CConverter::GenerateColLib()
                 if (imgCol.Unpack(out, offset)) {
                     offset += out.GetSize();
 
-                    std::string modelName(out.GetName());
-                    modelName.resize(20);
+                    std::string modelName = out.GetName().GetLowerString();
                     if (m_usedModels.contains(modelName)) {
                         const size_t from = m_cols.GetSize();
                         m_cols.Add(out);
@@ -286,7 +280,7 @@ void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
 {
     auto filter = [&](auto &container) {
         for (const auto &def : container) {
-            out.insert(def.texDictName);
+            out.insert(std::move(def.texDictName.GetLowerString()));
         }
     };
 
@@ -326,8 +320,8 @@ void CConverter::WriteIMGs()
     for (std::string name : usedTxds) {
         name.shrink_to_fit();
         name.append(".txd");
-        if (!imgRepacker.ExportFile(name.c_str())) {
-            m_log->Error("Error writing: %s", name);
+        if (!imgRepacker.ExportFile(name)) {
+            m_log->Error("Error writing: %s", name.c_str());
         }
     }
 
@@ -335,8 +329,8 @@ void CConverter::WriteIMGs()
     for (std::string name : m_usedModels) {
         name.shrink_to_fit();
         name.append(".dff");
-        if (!imgRepacker.ExportFile(name.c_str())) {
-            m_log->Error("Error writing: %s", name);
+        if (!imgRepacker.ExportFile(name)) {
+            m_log->Error("Error writing: %s", name.c_str());
         }
     }
 

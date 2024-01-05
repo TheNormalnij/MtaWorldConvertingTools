@@ -25,7 +25,7 @@ void CIplLoader::Read(std::vector<SIplInfo> &out)
                     const auto scanned = sscanf(buff.c_str(),
                                                 "%d %s %d %f %f %f %f %f %f %f %d",
                                                 &def.modelId,
-                                                def.modelName,
+                                                def.modelName.data(),
                                                 &def.interior,
                                                 &def.x, &def.y, &def.z,
                                                 &def.rx, &def.ry, &def.rz, &def.rw,
