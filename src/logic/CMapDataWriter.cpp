@@ -1,12 +1,19 @@
 #include "CMapDataWriter.h"
 
-void CMapDataWriter::Write(std::vector<SIplInfo> &ipl)
+void CMapDataWriter::Write()
 {
-    m_stream << "-- Generated with converter version " << PROJECT_VEWSION << "\n";
+    m_stream << "-- Generated with converter version " << PROJECT_VERSION << "\n";
     m_stream << "return {\n";
 
     // Col map
     m_stream << "\tcolmap = {\n";
+    std::unordered_map<std::string, size_t> colPos;
+
+    for (size_t i = 1; const auto &map : *m_pColMap) {
+        colPos[map.first] = i;
+        m_stream << "\t\t{ " << map.second.first << ", " << map.second.second << " };" << std::endl;
+        i++;
+    }
 
     m_stream << "\t};\n";
 

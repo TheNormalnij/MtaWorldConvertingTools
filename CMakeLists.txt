@@ -70,7 +70,7 @@ set_target_properties(WorldConv PROPERTIES
 target_compile_definitions(
     WorldConv
     PUBLIC
-        PROJECT_VEWSION=${PROJECT_VERSION})
+        PROJECT_VERSION=${PROJECT_VERSION})
 
 include(GNUInstallDirs)
 install(TARGETS WorldConv

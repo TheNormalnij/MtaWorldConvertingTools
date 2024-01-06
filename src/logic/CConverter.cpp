@@ -262,7 +262,7 @@ void CConverter::GenerateColLib()
                     if (m_usedModels.contains(modelName)) {
                         const size_t from = m_cols.GetSize();
                         m_cols.Add(out);
-                        m_colMap[modelName] = {from, offset};
+                        m_colMap[modelName] = {from, m_cols.GetSize()};
                     }
                 } else {
                     break;
@@ -340,9 +340,16 @@ void CConverter::WriteIMGs()
 
 void CConverter::WriteMapInfo()
 {
-    CMapDataWriter mapWriter(std::move(m_settings.outputPath / "register.lua"));
+    m_log->Info("Write world.lua");
+
+    CMapDataWriter mapWriter(std::move(m_settings.outputPath / "world.lua"));
 
     mapWriter.Create();
+
+    mapWriter.SetColMap(&m_colMap);
+    mapWriter.SetIplInfo(&m_modMap);
+
+    mapWriter.Write();
 
     mapWriter.Close();
 }
