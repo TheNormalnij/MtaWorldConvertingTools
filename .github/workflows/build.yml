@@ -15,11 +15,11 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        host: 'windows'
+        host: 'linux'
         target: 'desktop'
         set-env: 'true'
     - uses: actions/checkout@v3
-    - name: Compile with GCC
+    - name: Compile
       run: |
         cmake . -B build
         cmake --build build --config ${{ matrix.build_type }}
@@ -27,6 +27,6 @@ jobs:
     - name: Store artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: GCC_DLL_${{ matrix.build_type }}
+        name: WorldConv_${{ matrix.build_type }}
         path: |
           ${{ github.workspace }}/build/WorldConv
