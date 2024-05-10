@@ -1,7 +1,5 @@
 #include "CGtaDatLoader.h"
 
-#include <string>
-
 void CGtaDatLoader::Read()
 {
     std::string buff;
@@ -9,7 +7,7 @@ void CGtaDatLoader::Read()
     while(!m_stream.eof()) {
         ReadLine(buff);
         if (buff.empty()) {
-            break;
+            continue;
         }
 
         if (buff.ends_with('\r')) {

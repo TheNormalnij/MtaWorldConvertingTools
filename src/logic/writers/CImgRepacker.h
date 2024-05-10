@@ -2,7 +2,7 @@
 
 #include <filesystem>
 #include <vector>
-#include "CIMG.h"
+#include "../CIMG.h"
 
 class CImgRepacker
 {

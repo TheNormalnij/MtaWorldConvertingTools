@@ -47,7 +47,6 @@ bool CIMG::Create()
 
 bool CIMG::Open()
 {
-
     if (!m_filesInfo.empty())
         return false;
 
@@ -195,13 +194,14 @@ bool CIMG::HasHeaderSizeForNextElement()
 
 void CIMG::ExtentHeader()
 {
+
     // Find file with minimal size
     auto minFile = std::min_element(m_filesInfo.begin(), m_filesInfo.end(), [](const auto &a, const auto &b) { return a.uiOffset < b.uiOffset; });
-    SImgFileInfo* file = minFile.base();
+    SImgFileInfo file = *minFile;
 
     // Unpack this file
     std::vector<char> buff;
-    UnpackFile(file, buff);
+    UnpackFile(&file, buff);
 
     // Move file
     const size_t size = GetSize();
@@ -209,12 +209,12 @@ void CIMG::ExtentHeader()
     m_stream.write(buff.data(), buff.size());
 
     // Zero old file
-    m_stream.seekp(file->uiOffset * BLOCK_SIZE);
+    m_stream.seekp(file.uiOffset * BLOCK_SIZE);
     std::fill(buff.begin(), buff.end(), '\000');
     m_stream.write(buff.data(), buff.size());
 
     // Update file info
-    file->uiOffset = size / BLOCK_SIZE;
+    file.uiOffset = size / BLOCK_SIZE;
 
     // Update start offset
     m_startDataOffset += minFile->usSize * BLOCK_SIZE;

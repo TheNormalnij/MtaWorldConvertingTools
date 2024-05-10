@@ -5,9 +5,11 @@
 #include <list>
 #include <unordered_set>
 
-#include "CIdeLoader.h"
-#include "CIplLoader.h"
-#include "CGtaDatLoader.h"
+#include "loaders/CIdeLoader.h"
+#include "loaders/CIplLoader.h"
+#include "loaders/CGtaDatLoader.h"
+#include "loaders/CWaterLoader.h"
+#include "convertors/convertors.h"
 #include "CIMG.h"
 
 #include "CColLib.h"
@@ -40,6 +42,7 @@ private:
     bool LoadModGtaDat();
     bool LoadModModelDefs();
     bool LoadModIpls();
+    bool LoadModWaterData();
 
     void RemoveLods();
     void FilterUnusedModels();
@@ -58,6 +61,8 @@ private:
 
     void MakePath(const fs::path &root, const std::string &add, fs::path &out);
 
+    void ConvetMapInfoToMTA();
+
 private:
     ILogger *m_log;
     const SConverterParams m_settings;
@@ -68,7 +73,9 @@ private:
     std::vector<STimeModelDef> m_timed;
     std::vector<SClumpModelDef> m_clump;
 
+    std::vector<SWaterInfo> m_waterinfo;
     std::vector<SIplInfo> m_modMap;
+    std::vector<SMapObject> m_mtaMap;
     std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> m_colMap;
     std::list<CIMG> m_modImgs;
 

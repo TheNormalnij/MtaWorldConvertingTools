@@ -2,7 +2,7 @@
 
 #include "CLoader.h"
 #include <vector>
-#include "CArrayStr.h"
+#include "../CArrayStr.h"
 
 struct SAtomicModelDef {
     uint32_t modelId;

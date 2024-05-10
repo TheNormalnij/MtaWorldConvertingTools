@@ -7,7 +7,7 @@
 template<int size>
 class CArrayStr {
 public:
-    CArrayStr(): m_data(0) {};
+    CArrayStr(): m_data{} {};
     ~CArrayStr() = default;
 
     size_t GetSize() const noexcept {

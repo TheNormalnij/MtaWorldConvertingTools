@@ -33,6 +33,7 @@ public:
     bool AddFile(std::string_view fileName, const char *content, size_t count);
     size_t GetFilesCount() const noexcept { return m_filesInfo.size(); };
 
+    const SImgFileInfo *GetFileInfo(size_t index) const { return &m_filesInfo[index]; };
     const SImgFileInfo *GetFileInfo(const char* name) { return m_fileMap[name]; };
     const SImgFileInfo *GetFileInfo(std::string &name) { return m_fileMap[name]; };
 

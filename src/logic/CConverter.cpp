@@ -1,9 +1,9 @@
 #include "CConverter.h"
 
 #include <unordered_set>
-#include "CMapDataWriter.h"
-#include "CMetaWriter.h"
-#include "CImgRepacker.h"
+#include "writers/CMapDataWriter.h"
+#include "writers/CMetaWriter.h"
+#include "writers/CImgRepacker.h"
 
 #ifndef _WIN32
     #include "CPathResolver.h"
@@ -27,6 +27,8 @@ void CConverter::Convert()
             return;
         }
 
+        LoadModWaterData();
+
         // Default files
         m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta3.img"));
         m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta_int.img"));
@@ -46,6 +48,8 @@ void CConverter::Convert()
         }
 
         FilterUnusedModels();
+
+        ConvetMapInfoToMTA();
 
         if (!OpenModIMGs()){
             m_log->Error("Can not continue without mod IMG's");
@@ -150,12 +154,32 @@ bool CConverter::LoadModIpls()
     return true;
 }
 
+bool CConverter::LoadModWaterData() {
+    m_log->Info("Load mod water.dat");
+
+    CWaterLoader waterLoader{m_settings.modPath / "data/water.dat"};
+
+    if (waterLoader.Open()) {
+        waterLoader.Read(m_waterinfo);
+
+        waterLoader.Close();
+
+        m_log->Info("Found %d water points", m_waterinfo.size());
+        return true;
+    } else {
+        m_log->Warning("Can not open data/water.dat");
+        return false;
+    }
+
+
+}
+
 void CConverter::RemoveLods()
 {
     m_log->Info("Remove LOD's");
     std::vector<SIplInfo> filtered;
 
-    for (int i = m_modMap.size(); i >= 0; i--) {
+    for (int i = m_modMap.size() - 1; i >= 0; i--) {
         const auto lod = m_modMap[i].lod;
         if (lod != -1) {
             m_modMap[lod].modelId = 0;
@@ -182,7 +206,10 @@ void CConverter::FilterUnusedModels()
     }
 
     auto filter = [&](auto &container) {
-        typeof(container) temp;
+        // Try better later
+        auto temp = container;
+        temp.clear();
+        //
         for (const auto &def : container) {
             if (usedSet.contains(def.modelId)) {
                 temp.emplace_back(def);
@@ -262,7 +289,7 @@ void CConverter::GenerateColLib()
                     if (m_usedModels.contains(modelName)) {
                         const size_t from = m_cols.GetSize();
                         m_cols.Add(out);
-                        m_colMap[modelName] = {from, m_cols.GetSize()};
+                        m_colMap[modelName] = {from + 1, m_cols.GetSize()};
                     }
                 } else {
                     break;
@@ -287,6 +314,36 @@ void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
     filter(m_atomic);
     filter(m_timed);
     filter(m_clump);
+}
+
+void CConverter::ConvetMapInfoToMTA() {
+    m_log->Info("Convert map to MTA format");
+    const size_t count = m_modMap.size();
+
+    std::unordered_map<uint32_t, uint32_t> modelDefId{};
+
+    size_t offset = 0;
+    auto fill = [&](auto &container) {
+        for (uint32_t i = 0; i < container.size(); i++) {
+            modelDefId[container[i].modelId] = i + offset;
+        }
+        offset += container.size();
+    };
+
+    fill(m_atomic);
+    fill(m_timed);
+    fill(m_clump);
+
+    m_mtaMap.resize(count);
+    for (int i = 0; i < count; i++) {
+        convertPosForMta(m_modMap[i], m_mtaMap[i]);
+        m_mtaMap[i].modelDef = modelDefId[m_modMap[i].modelId];
+        const int32_t lod = m_modMap[i].lod;
+        if (lod >= 0) {
+            m_mtaMap[lod].isLod = true;
+        }
+    }
+    m_modMap.clear();
 }
 
 void CConverter::WriteIMGs()
@@ -346,12 +403,24 @@ void CConverter::WriteMapInfo()
 
     mapWriter.Create();
 
+    CIMG outputImg = CIMG(m_settings.outputPath / "world1.img");
+    outputImg.Open();
+
+    mapWriter.SetIMG(&outputImg);
     mapWriter.SetColMap(&m_colMap);
-    mapWriter.SetIplInfo(&m_modMap);
+    mapWriter.SetIplInfo(&m_mtaMap);
+
+    mapWriter.SetAtomic(&m_atomic);
+    mapWriter.SetTimed(&m_timed);
+    mapWriter.SetClump(&m_clump);
+
+    mapWriter.SetWater(&m_waterinfo);
 
     mapWriter.Write();
 
     mapWriter.Close();
+
+    outputImg.Close();
 }
 
 void CConverter::WriteMeta()

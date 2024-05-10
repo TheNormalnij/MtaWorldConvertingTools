@@ -18,7 +18,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     m_workThread = nullptr;
     m_guiLogger = new CGuiTextBrowsertLogger(ui->Log);
 
-    m_settings.modPath = "/mnt/win/Games/GTA CCD";
+    m_settings.modPath = "/mnt/win/Games/GTA United 1.2";
     m_settings.removeLods = true;
 
     ApplyConfig();
@@ -64,7 +64,8 @@ void CMainWindow::OnConvertingFinished()
 
 void CMainWindow::SelectPath(fs::path &to, QString info, QLabel *label)
 {
-    QString dir = QFileDialog::getExistingDirectory(this, info, to.c_str(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    auto tostr = to.generic_u8string();
+    QString dir = QFileDialog::getExistingDirectory(this, info, tostr.c_str(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     to = dir.toStdString();
     label->setText(dir);
 }
@@ -83,9 +84,9 @@ void CMainWindow::SelectOutputPath() {
 
 void CMainWindow::ApplyConfig()
 {
-    ui->gta_path_final->setText(m_settings.gtaPath.c_str());
-    ui->mod_path_final->setText(m_settings.modPath.c_str());
-    ui->output_path_final->setText(m_settings.outputPath.c_str());
+    ui->gta_path_final->setText(m_settings.gtaPath.generic_u8string().c_str());
+    ui->mod_path_final->setText(m_settings.modPath.generic_u8string().c_str());
+    ui->output_path_final->setText(m_settings.outputPath.generic_u8string().c_str());
 
     ui->ChkRemoveLods->setCheckState(m_settings.removeLods ? Qt::Checked : Qt::Unchecked);
 }
