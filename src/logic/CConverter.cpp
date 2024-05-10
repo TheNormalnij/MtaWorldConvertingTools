@@ -337,7 +337,7 @@ void CConverter::ConvetMapInfoToMTA() {
     m_mtaMap.resize(count);
     for (int i = 0; i < count; i++) {
         convertPosForMta(m_modMap[i], m_mtaMap[i]);
-        m_mtaMap[i].modelDef = modelDefId[m_modMap[i].modelId];
+        m_mtaMap[i].modelDef = modelDefId[m_modMap[i].modelId] + 1;
         const int32_t lod = m_modMap[i].lod;
         if (lod >= 0) {
             m_mtaMap[lod].isLod = true;
