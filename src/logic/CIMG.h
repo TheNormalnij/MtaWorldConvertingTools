@@ -27,8 +27,6 @@ public:
     bool Open();
     bool Close();
 
-    bool UnpackFile(size_t pos, std::vector<char> &buff);
-
     bool UnpackFile(size_t fileIndex, std::vector<char> &buff);
     bool UnpackFile(size_t offsetBlock, size_t sizeBlock, std::vector<char> &buff);
     bool UnpackFile(const SImgFileInfo *info, std::vector<char> &buff);

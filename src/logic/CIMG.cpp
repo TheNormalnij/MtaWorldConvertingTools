@@ -153,7 +153,7 @@ bool CIMG::AddFile(std::string_view fileName, const char *content, size_t count)
 
     // Get offset with alingment
     size_t pos = GetSize();
-    pos += pos % BLOCK_SIZE;
+    pos += 2048 - pos % BLOCK_SIZE;
 
     m_stream.seekp(pos);
 
@@ -200,7 +200,6 @@ bool CIMG::HasHeaderSizeForNextElement()
 
 void CIMG::ExtentHeader()
 {
-
     // Find file with minimal offset
     auto minFile = std::min_element(m_filesInfo.begin(), m_filesInfo.end(), [](const auto &a, const auto &b) { return a.uiOffset < b.uiOffset; });
 
