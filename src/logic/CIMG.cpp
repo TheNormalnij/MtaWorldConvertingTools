@@ -115,15 +115,7 @@ bool CIMG::Close()
 
 bool CIMG::UnpackFile(const SImgFileInfo *info, std::vector<char> &buff)
 {
-    const size_t size = info->usSize * BLOCK_SIZE;
-
-    buff.resize(size);
-
-    m_stream.seekg(info->uiOffset * BLOCK_SIZE);
-
-    m_stream.read(buff.data(), size);
-
-    return true;
+    return UnpackFile(info->uiOffset, info->usSize, buff);
 }
 
 bool CIMG::UnpackFile(size_t pos, std::vector<char> &buff)
@@ -134,6 +126,20 @@ bool CIMG::UnpackFile(size_t pos, std::vector<char> &buff)
 
     return UnpackFile(&m_filesInfo[pos], buff);
 }
+
+bool CIMG::UnpackFile(size_t offsetBlock, size_t sizeBlock, std::vector<char> &buff)
+{
+    const size_t size = sizeBlock * BLOCK_SIZE;
+
+    buff.resize(size);
+
+    m_stream.seekg(offsetBlock * BLOCK_SIZE);
+
+    m_stream.read(buff.data(), size);
+
+    return true;
+}
+
 
 bool CIMG::AddFile(std::string_view fileName, const char *content, size_t count)
 {
@@ -195,13 +201,12 @@ bool CIMG::HasHeaderSizeForNextElement()
 void CIMG::ExtentHeader()
 {
 
-    // Find file with minimal size
+    // Find file with minimal offset
     auto minFile = std::min_element(m_filesInfo.begin(), m_filesInfo.end(), [](const auto &a, const auto &b) { return a.uiOffset < b.uiOffset; });
-    SImgFileInfo file = *minFile;
 
     // Unpack this file
     std::vector<char> buff;
-    UnpackFile(&file, buff);
+    UnpackFile(minFile->uiOffset, minFile->usSize, buff);
 
     // Move file
     const size_t size = GetSize();
@@ -209,12 +214,12 @@ void CIMG::ExtentHeader()
     m_stream.write(buff.data(), buff.size());
 
     // Zero old file
-    m_stream.seekp(file.uiOffset * BLOCK_SIZE);
+    m_stream.seekp(minFile->uiOffset * BLOCK_SIZE);
     std::fill(buff.begin(), buff.end(), '\000');
     m_stream.write(buff.data(), buff.size());
 
     // Update file info
-    file.uiOffset = size / BLOCK_SIZE;
+    minFile->uiOffset = size / BLOCK_SIZE;
 
     // Update start offset
     m_startDataOffset += minFile->usSize * BLOCK_SIZE;
