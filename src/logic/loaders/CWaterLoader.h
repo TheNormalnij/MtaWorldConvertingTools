@@ -24,7 +24,9 @@ struct SWaterInfo {
     uint8_t flags;
 
     bool IsShallow() const noexcept {
-        return flags & 2;
+        //return flags & 2;
+        // Disabled, because makes water element invisible
+        return false;;
     }
 };
 
