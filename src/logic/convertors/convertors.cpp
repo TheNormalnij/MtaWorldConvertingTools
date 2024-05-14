@@ -17,6 +17,7 @@ void convertPosForMta(SIplInfo &from, SMapObject &to) {
     to.modelId = from.modelId;
     to.modelDef = 0;
     to.interior = from.interior;
+    to.lod = from.lod;
 
     quaternionToEulerAngles(from.rx, from.ry, from.rz, from.rw, to.rx, to.ry, to.rz);
 }

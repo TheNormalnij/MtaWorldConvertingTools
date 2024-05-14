@@ -45,6 +45,7 @@ private:
     bool LoadModWaterData();
 
     void RemoveLods();
+    void ReorderLods();
     void FilterUnusedModels();
 
     bool OpenModIMGs();

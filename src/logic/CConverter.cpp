@@ -45,6 +45,8 @@ void CConverter::Convert()
 
         if (m_settings.removeLods) {
             RemoveLods();
+        } else {
+            ReorderLods();
         }
 
         FilterUnusedModels();
@@ -193,6 +195,22 @@ void CConverter::RemoveLods()
 
     std::string info = "Removed lods count: " + std::to_string((filtered.size() - m_modMap.size()));
     m_log->Verbose((info.c_str()));
+}
+
+void CConverter::ReorderLods()
+{
+    m_log->Info("Reorder LOD's");
+    std::vector<SIplInfo> filtered;
+
+    for (int i = 0; i < m_modMap.size(); i++) {
+        const int32_t lodPos = m_modMap[i].lod;
+        if (lodPos > i) {
+            m_modMap[i].lod = i;
+            const SIplInfo lod = m_modMap[lodPos];
+            m_modMap[lodPos] = m_modMap[i];
+            m_modMap[i] = lod;
+        }
+    }
 }
 
 void CConverter::FilterUnusedModels()
