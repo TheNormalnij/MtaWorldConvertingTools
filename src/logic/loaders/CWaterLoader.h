@@ -25,8 +25,8 @@ struct SWaterInfo {
 
     bool IsShallow() const noexcept {
         //return flags & 2;
-        // Disabled, because makes water element invisible
-        return false;;
+        // Disabled, because it makes water element invisible
+        return false;
     }
 };
 
