@@ -35,6 +35,8 @@ void CIplLoader::Read(std::vector<SIplInfo> &out)
                         continue;
                     }
 
+                    def.rw = -def.rw;
+
                     if (def.lod != -1) {
                         def.lod += lodOffset;
                     }
