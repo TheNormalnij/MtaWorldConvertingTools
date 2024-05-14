@@ -178,14 +178,19 @@ bool CConverter::LoadModWaterData() {
 void CConverter::RemoveLods()
 {
     m_log->Info("Remove LOD's");
-    std::vector<SIplInfo> filtered;
 
-    for (int i = m_modMap.size() - 1; i >= 0; i--) {
+    for (size_t i = 0; i < m_modMap.size(); i++) {
         const auto lod = m_modMap[i].lod;
         if (lod != -1) {
             m_modMap[lod].modelId = 0;
+            m_modMap[i].lod = -1;
         }
+    }
 
+    std::vector<SIplInfo> filtered;
+    filtered.reserve(m_modMap.size());
+
+    for (int i = m_modMap.size() - 1; i >= 0; i--) {
         if (m_modMap[i].modelId != 0) {
             filtered.emplace_back(m_modMap[i]);
         }
