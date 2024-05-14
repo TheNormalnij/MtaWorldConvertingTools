@@ -11,7 +11,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
     connect(ui->BtnConvert, SIGNAL(clicked()), this, SLOT(StartConverting()));
 
-    connect(ui->BtnSelectGtaPath, SIGNAL(clicked()), this, SLOT(SelectGtaPath()));
+    //connect(ui->BtnSelectGtaPath, SIGNAL(clicked()), this, SLOT(SelectGtaPath()));
     connect(ui->BtnSelectModPath, SIGNAL(clicked()), this, SLOT(SelectModPath()));
     connect(ui->BtnSelectOutPath, SIGNAL(clicked()), this, SLOT(SelectOutputPath()));
 
@@ -19,7 +19,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     m_guiLogger = new CGuiTextBrowsertLogger(ui->Log);
 
     m_settings.modPath = "/mnt/win/Games/GTA United 1.2";
-    m_settings.removeLods = true;
+    m_settings.removeLods = false;
 
     ApplyConfig();
 
@@ -48,6 +48,8 @@ void CMainWindow::StartConverting()
 
     ui->Log->clear();
 
+    m_settings.removeLods = ui->ChkRemoveLods->checkState() == Qt::Checked;
+
     m_workThread = new CConvertWorkingThread(m_guiLogger, m_settings);
 
     connect(m_workThread, SIGNAL(finished()), this, SLOT(OnConvertingFinished()));
@@ -71,7 +73,7 @@ void CMainWindow::SelectPath(fs::path &to, QString info, QLabel *label)
 }
 
 void CMainWindow::SelectGtaPath() {
-    SelectPath(m_settings.gtaPath, tr("Select GTA SA folder"), ui->gta_path_final);
+    //SelectPath(m_settings.gtaPath, tr("Select GTA SA folder"), ui->gta_path_final);
 }
 
 void CMainWindow::SelectModPath() {
@@ -84,7 +86,7 @@ void CMainWindow::SelectOutputPath() {
 
 void CMainWindow::ApplyConfig()
 {
-    ui->gta_path_final->setText(m_settings.gtaPath.generic_u8string().c_str());
+    //ui->gta_path_final->setText(m_settings.gtaPath.generic_u8string().c_str());
     ui->mod_path_final->setText(m_settings.modPath.generic_u8string().c_str());
     ui->output_path_final->setText(m_settings.outputPath.generic_u8string().c_str());
 

@@ -145,7 +145,6 @@ bool CConverter::LoadModIpls()
             return false;
         }
 
-        // TODO lod linking
         iplLoader.Read(m_modMap);
 
         iplLoader.Close();
