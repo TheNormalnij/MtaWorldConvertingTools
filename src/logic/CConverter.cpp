@@ -51,6 +51,11 @@ void CConverter::Convert()
 
         FilterUnusedModels();
 
+        if (!LoadModPhysicalInfo()) {
+            m_log->Error("Can not continue without mod objects.dat");
+            return;
+        }
+
         ConvetMapInfoToMTA();
 
         if (!OpenModIMGs()){
@@ -171,8 +176,27 @@ bool CConverter::LoadModWaterData() {
         m_log->Warning("Can not open data/water.dat");
         return false;
     }
+}
 
+bool CConverter::LoadModPhysicalInfo()
+{
+    m_log->Info("Load mod object.dat");
 
+    CObjectsDatLoader datLoader {m_settings.modPath / "data/object.dat"};
+
+    if (!datLoader.Open()) {
+        return false;
+    }
+
+    std::vector<SObjectsInfo> physInfo;
+    datLoader.Read(physInfo);
+
+    datLoader.Close();
+
+    CPhysicalDataConvertor convertor(&physInfo, &m_usedModels);
+    convertor.Convert(m_physical);
+
+    return true;
 }
 
 void CConverter::RemoveLods()
@@ -343,11 +367,14 @@ void CConverter::ConvetMapInfoToMTA() {
     const size_t count = m_modMap.size();
 
     std::unordered_map<uint32_t, uint32_t> modelDefId{};
+    std::unordered_map<std::string, uint32_t> modelNameToDef{};
 
     size_t offset = 0;
     auto fill = [&](auto &container) {
         for (uint32_t i = 0; i < container.size(); i++) {
-            modelDefId[container[i].modelId] = i + offset;
+            const uint32_t defId = i + offset;
+            modelDefId[container[i].modelId] = defId;
+            modelNameToDef[container[i].modelName.GetLowerString()] = defId;
         }
         offset += container.size();
     };
@@ -366,6 +393,15 @@ void CConverter::ConvetMapInfoToMTA() {
         }
     }
     m_modMap.clear();
+
+    for (const auto &group : m_physical.models) {
+        std::vector<uint32_t> groupInfo{};
+        groupInfo.reserve(group.size());
+        for (const std::string &modelName : group) {
+            groupInfo.push_back(modelNameToDef[modelName]);
+        }
+        m_physical.defs.push_back(groupInfo);
+    }
 }
 
 void CConverter::WriteIMGs()
@@ -437,6 +473,7 @@ void CConverter::WriteMapInfo()
     mapWriter.SetClump(&m_clump);
 
     mapWriter.SetWater(&m_waterinfo);
+    mapWriter.SetPhysicalInfo(&m_physical);
 
     mapWriter.Write();
 

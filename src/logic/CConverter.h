@@ -10,6 +10,7 @@
 #include "loaders/CGtaDatLoader.h"
 #include "loaders/CWaterLoader.h"
 #include "convertors/convertors.h"
+#include "convertors/CPhysicalDataConvertor.h"
 #include "CIMG.h"
 
 #include "CColLib.h"
@@ -43,6 +44,7 @@ private:
     bool LoadModModelDefs();
     bool LoadModIpls();
     bool LoadModWaterData();
+    bool LoadModPhysicalInfo();
 
     void RemoveLods();
     void ReorderLods();
@@ -83,4 +85,5 @@ private:
     CColLib m_cols;
 
     std::unordered_set<std::string> m_usedModels;
+    SMTAPhysicalInfo m_physical;
 };
