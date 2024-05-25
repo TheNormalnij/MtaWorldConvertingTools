@@ -18,7 +18,6 @@ CMainWindow::CMainWindow(QWidget *parent)
     m_workThread = nullptr;
     m_guiLogger = new CGuiTextBrowsertLogger(ui->Log);
 
-    m_settings.modPath = "/mnt/win/Games/GTA United 1.2";
     m_settings.removeLods = false;
 
     ApplyConfig();
