@@ -4,6 +4,7 @@
 #include "writers/CMapDataWriter.h"
 #include "writers/CMetaWriter.h"
 #include "writers/CImgRepacker.h"
+#include "writers/CRegisterWriter.h"
 
 #ifndef _WIN32
     #include "CPathResolver.h"
@@ -74,6 +75,11 @@ void CConverter::Convert()
         if (m_settings.genMeta) {
             WriteMeta();
         }
+
+        if (m_settings.genRegister) {
+            WriteRegister();
+        }
+
     } catch (...) {
         m_log->Error("Unknown error");
     }
@@ -486,7 +492,7 @@ void CConverter::WriteMeta()
 {
     m_log->Info("Write meta.xml");
 
-    CMetaWriter metaWriter( std::move(m_settings.outputPath / "meta.xml") );
+    CMetaWriter metaWriter( m_settings.outputPath / "meta.xml" );
 
     if (!metaWriter.Create()) {
         m_log->Error("Can not create meta.xml file");
@@ -499,6 +505,22 @@ void CConverter::WriteMeta()
     metaWriter.Write();
 
     metaWriter.Close();
+}
+
+void CConverter::WriteRegister()
+{
+    m_log->Info("Write register.lua");
+
+    CRegisterWriter registerWriter(m_settings.outputPath / "register.lua", m_settings.worldName);
+
+    if (!registerWriter.Create()) {
+        m_log->Error("Can not create register.xml file");
+        return;
+    }
+
+    registerWriter.Write();
+
+    registerWriter.Close();
 }
 
 void CConverter::MakePath(const fs::path &root, const std::string &add, fs::path &out)

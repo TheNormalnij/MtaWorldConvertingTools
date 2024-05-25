@@ -48,6 +48,11 @@ void CMainWindow::StartConverting()
     ui->Log->clear();
 
     m_settings.removeLods = ui->ChkRemoveLods->checkState() == Qt::Checked;
+    m_settings.genMeta = true;
+    m_settings.genRegister = true;
+
+    QString qstrName = ui->world_name_edit->text();
+    m_settings.worldName = qstrName.toStdString();
 
     m_workThread = new CConvertWorkingThread(m_guiLogger, m_settings);
 

@@ -23,13 +23,10 @@ struct SConverterParams {
     fs::path gtaPath;
     fs::path modPath;
     fs::path outputPath;
+    std::string worldName;
+    bool removeLods;
     bool genMeta;
     bool genRegister;
-    bool packOneCol;
-    bool removeLods;
-    bool useLowerCase;
-    bool optimiseModelsCount;
-    bool checkCompability; // For engineLoadDFF
 };
 
 class CConverter
@@ -61,6 +58,7 @@ private:
     size_t WriteIMG();
     void WriteMapInfo();
     void WriteMeta();
+    void WriteRegister();
 
     void MakePath(const fs::path &root, const std::string &add, fs::path &out);
 
