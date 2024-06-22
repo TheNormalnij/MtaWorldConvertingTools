@@ -69,7 +69,7 @@ void CMapDataWriter::WriteMapInfo() {
                info.ry,
                info.rz,
                info.isLod ? "true" : "false",
-               info.lod
+               info.lod + 1
                );
     }
     Printf("\t};\n");
