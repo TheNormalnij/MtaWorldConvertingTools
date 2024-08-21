@@ -1,9 +1,10 @@
 #include "CConverter.h"
 
 #include <unordered_set>
-#include "CMapDataWriter.h"
-#include "CMetaWriter.h"
-#include "CImgRepacker.h"
+#include "writers/CMapDataWriter.h"
+#include "writers/CMetaWriter.h"
+#include "writers/CImgRepacker.h"
+#include "writers/CRegisterWriter.h"
 
 #ifndef _WIN32
     #include "CPathResolver.h"
@@ -27,6 +28,8 @@ void CConverter::Convert()
             return;
         }
 
+        LoadModWaterData();
+
         // Default files
         m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta3.img"));
         m_modFiles.emplace_back(SGtaDatSection(EDatType::IMG, "models\\gta_int.img"));
@@ -43,9 +46,18 @@ void CConverter::Convert()
 
         if (m_settings.removeLods) {
             RemoveLods();
+        } else {
+            ReorderLods();
         }
 
         FilterUnusedModels();
+
+        if (!LoadModPhysicalInfo()) {
+            m_log->Error("Can not continue without mod objects.dat");
+            return;
+        }
+
+        ConvetMapInfoToMTA();
 
         if (!OpenModIMGs()){
             m_log->Error("Can not continue without mod IMG's");
@@ -63,6 +75,11 @@ void CConverter::Convert()
         if (m_settings.genMeta) {
             WriteMeta();
         }
+
+        if (m_settings.genRegister) {
+            WriteRegister();
+        }
+
     } catch (...) {
         m_log->Error("Unknown error");
     }
@@ -141,7 +158,6 @@ bool CConverter::LoadModIpls()
             return false;
         }
 
-        // TODO lod linking
         iplLoader.Read(m_modMap);
 
         iplLoader.Close();
@@ -150,17 +166,61 @@ bool CConverter::LoadModIpls()
     return true;
 }
 
+bool CConverter::LoadModWaterData() {
+    m_log->Info("Load mod water.dat");
+
+    CWaterLoader waterLoader{m_settings.modPath / "data/water.dat"};
+
+    if (waterLoader.Open()) {
+        waterLoader.Read(m_waterinfo);
+
+        waterLoader.Close();
+
+        m_log->Info("Found %d water points", m_waterinfo.size());
+        return true;
+    } else {
+        m_log->Warning("Can not open data/water.dat");
+        return false;
+    }
+}
+
+bool CConverter::LoadModPhysicalInfo()
+{
+    m_log->Info("Load mod object.dat");
+
+    CObjectsDatLoader datLoader {m_settings.modPath / "data/object.dat"};
+
+    if (!datLoader.Open()) {
+        return false;
+    }
+
+    std::vector<SObjectsInfo> physInfo;
+    datLoader.Read(physInfo);
+
+    datLoader.Close();
+
+    CPhysicalDataConvertor convertor(&physInfo, &m_usedModels);
+    convertor.Convert(m_physical);
+
+    return true;
+}
+
 void CConverter::RemoveLods()
 {
     m_log->Info("Remove LOD's");
-    std::vector<SIplInfo> filtered;
 
-    for (int i = m_modMap.size(); i >= 0; i--) {
+    for (size_t i = 0; i < m_modMap.size(); i++) {
         const auto lod = m_modMap[i].lod;
         if (lod != -1) {
             m_modMap[lod].modelId = 0;
+            m_modMap[i].lod = -1;
         }
+    }
 
+    std::vector<SIplInfo> filtered;
+    filtered.reserve(m_modMap.size());
+
+    for (int i = m_modMap.size() - 1; i >= 0; i--) {
         if (m_modMap[i].modelId != 0) {
             filtered.emplace_back(m_modMap[i]);
         }
@@ -170,6 +230,22 @@ void CConverter::RemoveLods()
 
     std::string info = "Removed lods count: " + std::to_string((filtered.size() - m_modMap.size()));
     m_log->Verbose((info.c_str()));
+}
+
+void CConverter::ReorderLods()
+{
+    m_log->Info("Reorder LOD's");
+    std::vector<SIplInfo> filtered;
+
+    for (int i = 0; i < m_modMap.size(); i++) {
+        const int32_t lodPos = m_modMap[i].lod;
+        if (lodPos > i) {
+            m_modMap[i].lod = i;
+            const SIplInfo lod = m_modMap[lodPos];
+            m_modMap[lodPos] = m_modMap[i];
+            m_modMap[i] = lod;
+        }
+    }
 }
 
 void CConverter::FilterUnusedModels()
@@ -182,7 +258,10 @@ void CConverter::FilterUnusedModels()
     }
 
     auto filter = [&](auto &container) {
-        typeof(container) temp;
+        // Try better later
+        auto temp = container;
+        temp.clear();
+        //
         for (const auto &def : container) {
             if (usedSet.contains(def.modelId)) {
                 temp.emplace_back(def);
@@ -262,7 +341,7 @@ void CConverter::GenerateColLib()
                     if (m_usedModels.contains(modelName)) {
                         const size_t from = m_cols.GetSize();
                         m_cols.Add(out);
-                        m_colMap[modelName] = {from, m_cols.GetSize()};
+                        m_colMap[modelName] = {from + 1, m_cols.GetSize()};
                     }
                 } else {
                     break;
@@ -287,6 +366,61 @@ void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
     filter(m_atomic);
     filter(m_timed);
     filter(m_clump);
+}
+
+void CConverter::ConvetMapInfoToMTA() {
+    m_log->Info("Convert map to MTA format");
+    const size_t count = m_modMap.size();
+
+    std::unordered_map<uint32_t, uint32_t> modelDefId{};
+    std::unordered_map<std::string, uint32_t> modelNameToDef{};
+
+    size_t offset = 0;
+    auto fill = [&](auto &container) {
+        for (uint32_t i = 0; i < container.size(); i++) {
+            const uint32_t defId = i + offset;
+            modelDefId[container[i].modelId] = defId;
+            modelNameToDef[container[i].modelName.GetLowerString()] = defId;
+        }
+        offset += container.size();
+    };
+
+    fill(m_atomic);
+    fill(m_timed);
+    fill(m_clump);
+
+    m_mtaMap.resize(count);
+    for (int i = 0; i < count; i++) {
+        convertPosForMta(m_modMap[i], m_mtaMap[i]);
+        m_mtaMap[i].modelDef = modelDefId[m_modMap[i].modelId] + 1;
+        const int32_t lod = m_modMap[i].lod;
+        if (lod >= 0) {
+            m_mtaMap[lod].isLod = true;
+        }
+    }
+    m_modMap.clear();
+
+    for (const auto &group : m_physical.models) {
+        std::vector<uint32_t> groupInfo{};
+        groupInfo.reserve(group.size());
+        for (const std::string &modelName : group) {
+            groupInfo.push_back(modelNameToDef[modelName]);
+        }
+        m_physical.defs.push_back(groupInfo);
+    }
+
+    // Remove unsupported flags
+    auto fixFlags = [&](auto &group) {
+        for (auto &info : group) {
+            // Disable garage door flag
+            // It causes crash
+            info.flags &= 0xFFFFF7FF;
+        }
+    };
+
+    fixFlags(m_atomic);
+    fixFlags(m_timed);
+    fixFlags(m_clump);
 }
 
 void CConverter::WriteIMGs()
@@ -346,19 +480,32 @@ void CConverter::WriteMapInfo()
 
     mapWriter.Create();
 
+    CIMG outputImg = CIMG(m_settings.outputPath / "world1.img");
+    outputImg.Open();
+
+    mapWriter.SetIMG(&outputImg);
     mapWriter.SetColMap(&m_colMap);
-    mapWriter.SetIplInfo(&m_modMap);
+    mapWriter.SetIplInfo(&m_mtaMap);
+
+    mapWriter.SetAtomic(&m_atomic);
+    mapWriter.SetTimed(&m_timed);
+    mapWriter.SetClump(&m_clump);
+
+    mapWriter.SetWater(&m_waterinfo);
+    mapWriter.SetPhysicalInfo(&m_physical);
 
     mapWriter.Write();
 
     mapWriter.Close();
+
+    outputImg.Close();
 }
 
 void CConverter::WriteMeta()
 {
     m_log->Info("Write meta.xml");
 
-    CMetaWriter metaWriter( std::move(m_settings.outputPath / "meta.xml") );
+    CMetaWriter metaWriter( m_settings.outputPath / "meta.xml" );
 
     if (!metaWriter.Create()) {
         m_log->Error("Can not create meta.xml file");
@@ -371,6 +518,22 @@ void CConverter::WriteMeta()
     metaWriter.Write();
 
     metaWriter.Close();
+}
+
+void CConverter::WriteRegister()
+{
+    m_log->Info("Write register.lua");
+
+    CRegisterWriter registerWriter(m_settings.outputPath / "register.lua", m_settings.worldName);
+
+    if (!registerWriter.Create()) {
+        m_log->Error("Can not create register.xml file");
+        return;
+    }
+
+    registerWriter.Write();
+
+    registerWriter.Close();
 }
 
 void CConverter::MakePath(const fs::path &root, const std::string &add, fs::path &out)

@@ -15,7 +15,7 @@ bool CImgRepacker::Create()
         return false;
     }
 
-    m_currentOutput = new CIMG(std::move(m_outputPath / "world1.img"));
+    m_currentOutput = new CIMG(m_outputPath / "world1.img");
 
     return m_currentOutput->Create();
 }

@@ -15,7 +15,7 @@ bool CPathResolver::ResolveRecursive(fs::path &root, QStringView add) {
 
     for (const auto &dir : fs::directory_iterator(root)) {
         const auto& fileName = dir.path().filename();
-        QString qPath = QString(fileName.c_str()).toLower();
+        QString qPath = QString(fileName.generic_u8string().c_str()).toLower();
         if (searchStr.compare(qPath) == 0) {
             if (to == -1) {
                 root = root / fileName;

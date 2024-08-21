@@ -7,6 +7,7 @@ enum class IPL_READ_MODE {
 
 void CIplLoader::Read(std::vector<SIplInfo> &out)
 {
+    const size_t lodOffset = out.size();
     IPL_READ_MODE mode = IPL_READ_MODE::NONE;
     std::string buff;
     while(!m_stream.eof()) {
@@ -32,6 +33,12 @@ void CIplLoader::Read(std::vector<SIplInfo> &out)
                                                 &def.lod);
                     if (scanned != 11) {
                         continue;
+                    }
+
+                    def.rw = -def.rw;
+
+                    if (def.lod != -1) {
+                        def.lod += lodOffset;
                     }
 
                     out.emplace_back(std::move(def));

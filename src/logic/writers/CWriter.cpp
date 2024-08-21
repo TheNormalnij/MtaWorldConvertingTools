@@ -18,3 +18,7 @@ void CWriter::Close()
     m_stream.flush();
     m_stream.close();
 }
+
+void CWriter::Printf(const char* fmt) {
+    m_stream << fmt;
+}

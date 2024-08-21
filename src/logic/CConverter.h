@@ -5,9 +5,12 @@
 #include <list>
 #include <unordered_set>
 
-#include "CIdeLoader.h"
-#include "CIplLoader.h"
-#include "CGtaDatLoader.h"
+#include "loaders/CIdeLoader.h"
+#include "loaders/CIplLoader.h"
+#include "loaders/CGtaDatLoader.h"
+#include "loaders/CWaterLoader.h"
+#include "convertors/convertors.h"
+#include "convertors/CPhysicalDataConvertor.h"
 #include "CIMG.h"
 
 #include "CColLib.h"
@@ -20,13 +23,10 @@ struct SConverterParams {
     fs::path gtaPath;
     fs::path modPath;
     fs::path outputPath;
+    std::string worldName;
+    bool removeLods;
     bool genMeta;
     bool genRegister;
-    bool packOneCol;
-    bool removeLods;
-    bool useLowerCase;
-    bool optimiseModelsCount;
-    bool checkCompability; // For engineLoadDFF
 };
 
 class CConverter
@@ -40,8 +40,11 @@ private:
     bool LoadModGtaDat();
     bool LoadModModelDefs();
     bool LoadModIpls();
+    bool LoadModWaterData();
+    bool LoadModPhysicalInfo();
 
     void RemoveLods();
+    void ReorderLods();
     void FilterUnusedModels();
 
     bool OpenModIMGs();
@@ -55,8 +58,11 @@ private:
     size_t WriteIMG();
     void WriteMapInfo();
     void WriteMeta();
+    void WriteRegister();
 
     void MakePath(const fs::path &root, const std::string &add, fs::path &out);
+
+    void ConvetMapInfoToMTA();
 
 private:
     ILogger *m_log;
@@ -68,11 +74,14 @@ private:
     std::vector<STimeModelDef> m_timed;
     std::vector<SClumpModelDef> m_clump;
 
+    std::vector<SWaterInfo> m_waterinfo;
     std::vector<SIplInfo> m_modMap;
+    std::vector<SMapObject> m_mtaMap;
     std::unordered_map<std::string, std::pair<uint32_t, uint32_t>> m_colMap;
     std::list<CIMG> m_modImgs;
 
     CColLib m_cols;
 
     std::unordered_set<std::string> m_usedModels;
+    SMTAPhysicalInfo m_physical;
 };
