@@ -408,6 +408,19 @@ void CConverter::ConvetMapInfoToMTA() {
         }
         m_physical.defs.push_back(groupInfo);
     }
+
+    // Remove unsupported flags
+    auto fixFlags = [&](auto &group) {
+        for (auto &info : group) {
+            // Disable garage door flag
+            // It causes crash
+            info.flags &= 0xFFFFF7FF;
+        }
+    };
+
+    fixFlags(m_atomic);
+    fixFlags(m_timed);
+    fixFlags(m_clump);
 }
 
 void CConverter::WriteIMGs()
