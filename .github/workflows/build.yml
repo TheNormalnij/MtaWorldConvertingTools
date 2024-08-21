@@ -11,7 +11,7 @@ jobs:
           arch: x64
       - uses: anthepro/install-qt-static@v1
         with:
-          version: 5.15.12
+          version: 6.7.2
           configure-args: -opensource -opengl desktop
           submodules: defaults
           dir: C:/qt-static/
