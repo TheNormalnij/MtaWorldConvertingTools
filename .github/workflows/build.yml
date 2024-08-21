@@ -13,7 +13,7 @@ jobs:
         with:
           version: 6.7.2
           configure-args: -opensource -opengl desktop
-          submodules: defaults
+          submodules: qtbase,qtshadertools,qtdeclarative
           dir: C:/qt-static/
       -
         name: Checkout
