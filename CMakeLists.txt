@@ -46,6 +46,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(WorldConv)
 endif()
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/bin)
 qt_generate_deploy_app_script(
     TARGET WorldConv
     OUTPUT_SCRIPT deploy_script
