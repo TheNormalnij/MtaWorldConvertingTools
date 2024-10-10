@@ -31,9 +31,11 @@ qt_add_executable(WorldConv
 
 qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
-target_link_libraries(WorldConv PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-target_link_libraries(WorldConv PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::Core)
+target_link_libraries(WorldConv PRIVATE
+    Qt6::Widgets
+    Qt6::Core
+    Qt6::Gui
+)
 
 target_compile_definitions(
     WorldConv
