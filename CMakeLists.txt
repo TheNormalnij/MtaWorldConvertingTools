@@ -12,6 +12,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/bin)
 
+if ( MSVC )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+endif ( MSVC )
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
@@ -48,12 +52,6 @@ target_compile_definitions(
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(WorldConv)
 endif()
-
-if ( MSVC )
-    set_target_properties( WorldConv PROPERTIES LIBRARY_OUTPUT_DIRECTORY CMAKE_INSTALL_PREFIX )
-    set_target_properties( WorldConv PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG CMAKE_INSTALL_PREFIX )
-    set_target_properties( WorldConv PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE CMAKE_INSTALL_PREFIX )
-endif ( MSVC )
 
 qt_generate_deploy_app_script(
     TARGET WorldConv
