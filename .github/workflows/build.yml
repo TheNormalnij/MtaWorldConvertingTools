@@ -31,7 +31,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --install
+      run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - uses: actions/upload-artifact@v4
       with:
