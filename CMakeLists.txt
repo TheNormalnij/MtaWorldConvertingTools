@@ -9,6 +9,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/bin)
+
+if ( MSVC )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+endif ( MSVC )
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
@@ -31,21 +38,27 @@ qt_add_executable(WorldConv
 
 qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
-target_link_libraries(WorldConv PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
+target_link_libraries(WorldConv PRIVATE
+    Qt6::Widgets
+    Qt6::Core
+    Qt6::Gui
+)
 
 target_compile_definitions(
     WorldConv
     PUBLIC
         PROJECT_VERSION=${PROJECT_VERSION})
 
-include(GNUInstallDirs)
-install(TARGETS WorldConv
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(WorldConv)
 endif()
+
+set_property(TARGET WorldConv PROPERTY WIN32_EXECUTABLE true)
+
+qt_generate_deploy_app_script(
+    TARGET WorldConv
+    OUTPUT_SCRIPT deploy_script
+    NO_UNSUPPORTED_PLATFORM_ERROR
+    NO_TRANSLATIONS
+)
+install(SCRIPT ${deploy_script})

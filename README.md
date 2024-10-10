@@ -13,3 +13,4 @@ MtaWorldConvertingTools is a tool that converts maps from your favorite GTA: SA 
 * Select modded GTA: SA path
 * Select output path
 * Click "Convert"
+
