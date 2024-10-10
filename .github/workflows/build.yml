@@ -17,9 +17,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install Qt static
-      uses: orestonce/install-qt-static@v0.4.3
+      uses: L-Super/install-qt-static@v1.0.2
       with:
-        version: Qt6.5.3-Windows-x86_64-MinGW13.2.0-ucrt-staticFull-20240527
+        version: Qt6.7.1-Windows-MinGW13.2.0
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
