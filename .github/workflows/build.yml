@@ -36,5 +36,5 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: Release
-        path: build/
+        name: WorldConv
+        path: build/${{env.BUILD_TYPE}}/WorldConv.exe
