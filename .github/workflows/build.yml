@@ -41,4 +41,4 @@ jobs:
         name: WorldConv
         path: |
           build/${{env.BUILD_TYPE}}
-          plugins/
+          ./
