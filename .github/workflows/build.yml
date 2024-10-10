@@ -19,7 +19,6 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: Qt6.7.1-Windows-MinGW13.2.0
         version: '6.7.2'
         host: 'windows'
         target: 'desktop'
