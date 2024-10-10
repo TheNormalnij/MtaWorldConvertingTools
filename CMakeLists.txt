@@ -42,13 +42,13 @@ target_compile_definitions(
     PUBLIC
         PROJECT_VERSION=${PROJECT_VERSION})
 
-include(GNUInstallDirs)
-install(TARGETS WorldConv
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(WorldConv)
 endif()
+
+qt_generate_deploy_app_script(
+    TARGET WorldConv
+    OUTPUT_SCRIPT deploy_script
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${deploy_script})
