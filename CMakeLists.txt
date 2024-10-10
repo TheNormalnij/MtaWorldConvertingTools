@@ -53,6 +53,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(WorldConv)
 endif()
 
+set_property(TARGET WorldConv PROPERTY WIN32_EXECUTABLE true)
+
 qt_generate_deploy_app_script(
     TARGET WorldConv
     OUTPUT_SCRIPT deploy_script
