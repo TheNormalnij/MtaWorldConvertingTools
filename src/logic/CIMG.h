@@ -32,11 +32,12 @@ public:
     bool UnpackFile(const SImgFileInfo *info, std::vector<char> &buff);
 
     bool AddFile(std::string_view fileName, const char *content, size_t count);
+    bool HasFile(std::string fileName) const noexcept { return m_fileMap.find(fileName) != m_fileMap.end(); }
     size_t GetFilesCount() const noexcept { return m_filesInfo.size(); };
 
-    const SImgFileInfo *GetFileInfo(size_t index) const { return &m_filesInfo[index]; };
-    const SImgFileInfo *GetFileInfo(const char* name) { return m_fileMap[name]; };
-    const SImgFileInfo *GetFileInfo(std::string &name) { return m_fileMap[name]; };
+    const SImgFileInfo *GetFileInfo(size_t index) const noexcept { return &m_filesInfo[index]; };
+    const SImgFileInfo *GetFileInfo(const char* name) const noexcept;
+    const SImgFileInfo *GetFileInfo(const std::string &name) const noexcept;
 
     size_t GetSize();
 

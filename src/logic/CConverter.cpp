@@ -5,6 +5,7 @@
 #include "writers/CMetaWriter.h"
 #include "writers/CImgRepacker.h"
 #include "writers/CRegisterWriter.h"
+#include "checkers/CDFFChecker.h"
 
 #ifndef _WIN32
     #include "CPathResolver.h"
@@ -52,17 +53,19 @@ void CConverter::Convert()
 
         FilterUnusedModels();
 
+        if (!OpenModIMGs()){
+            m_log->Error("Can not continue without mod IMG's");
+            return;
+        }
+
+        RemoveBrokenModels();
+
         if (!LoadModPhysicalInfo()) {
             m_log->Error("Can not continue without mod objects.dat");
             return;
         }
 
         ConvetMapInfoToMTA();
-
-        if (!OpenModIMGs()){
-            m_log->Error("Can not continue without mod IMG's");
-            return;
-        }
 
         GenerateColLib();
 
@@ -205,6 +208,85 @@ bool CConverter::LoadModPhysicalInfo()
     return true;
 }
 
+void CConverter::RemoveBrokenModels()
+{
+    m_log->Info("Remove broken models");
+
+    auto getImgFile = [&](const std::string &fileName, std::vector<char> &data) {
+        for (CIMG &img : m_modImgs) {
+            auto fileInfo = img.GetFileInfo(fileName);
+            if (fileInfo) {
+                img.UnpackFile(fileInfo, data);
+                return true;
+            }
+        }
+        m_log->Error("Can not find %s in IMGs", fileName);
+        return false;
+    };
+
+    auto isValidDff = [&](const std::string &modelName) {
+        std::vector<char> modelData;
+        const bool unpackStatus = getImgFile(modelName + ".dff", modelData);
+
+        if (!unpackStatus) {
+            return false;
+        }
+
+        CDFF dff{std::move(modelData)};
+        CDFFChecker checker{&dff};
+
+        const bool checkStatus = checker.Check();
+        if (!checkStatus) {
+            m_log->Error("Broken DFF: %s. Reason: %s", modelName.c_str(), checker.GetError().data());
+        }
+        return checkStatus;
+    };
+
+    auto removeModelFromMap = [&](uint32_t modelId) {
+        size_t deletedObjectsCount = 0;
+        for (size_t i = 0; i < m_modMap.size(); i++) {
+            if (m_modMap[i].modelId != modelId) {
+                continue;
+            }
+
+            for (int32_t j = i + 1; j < m_modMap.size(); j++) {
+                int32_t& lod = m_modMap[j].lod;
+                if (lod == i) {
+                    lod = -1;
+                } else if (lod > i) {
+                    lod--;
+                }
+
+                m_modMap[j - 1] = m_modMap[j];
+            }
+
+            deletedObjectsCount++;
+        }
+
+        if (deletedObjectsCount) {
+            m_log->Warning("Removed %d map objects", deletedObjectsCount);
+            m_modMap.resize(m_modMap.size() - deletedObjectsCount);
+        }
+    };
+
+    auto filterBroken = [&](auto &container) {
+        std::remove_reference_t<decltype(container)> temp{};
+        for (const auto &def : container) {
+            const std::string modelName = def.modelName.GetLowerString();
+            if (isValidDff(modelName)) {
+                temp.emplace_back(def);
+            } else {
+                removeModelFromMap(def.modelId);
+            }
+        }
+        container.swap(temp);
+    };
+
+    filterBroken(m_atomic);
+    filterBroken(m_timed);
+    filterBroken(m_clump);
+}
+
 void CConverter::RemoveLods()
 {
     m_log->Info("Remove LOD's");
@@ -258,10 +340,7 @@ void CConverter::FilterUnusedModels()
     }
 
     auto filter = [&](auto &container) {
-        // Try better later
-        auto temp = container;
-        temp.clear();
-        //
+        std::remove_reference_t<decltype(container)> temp{};
         for (const auto &def : container) {
             if (usedSet.contains(def.modelId)) {
                 temp.emplace_back(def);
@@ -404,7 +483,10 @@ void CConverter::ConvetMapInfoToMTA() {
         std::vector<uint32_t> groupInfo{};
         groupInfo.reserve(group.size());
         for (const std::string &modelName : group) {
-            groupInfo.push_back(modelNameToDef[modelName]);
+            const auto id = modelNameToDef.find(modelName);
+            if (id != modelNameToDef.end()) {
+                groupInfo.push_back(id->second);
+            }
         }
         m_physical.defs.push_back(groupInfo);
     }

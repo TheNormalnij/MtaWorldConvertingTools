@@ -179,6 +179,22 @@ bool CIMG::AddFile(std::string_view fileName, const char *content, size_t count)
     return true;
 }
 
+const SImgFileInfo *CIMG::GetFileInfo(const char *name) const noexcept
+{
+    const std::string strName{name};
+    return GetFileInfo(strName);
+}
+
+const SImgFileInfo *CIMG::GetFileInfo(const std::string &name) const noexcept
+{
+    auto infoIterator = m_fileMap.find(name);
+    if (infoIterator == m_fileMap.cend()) {
+        return nullptr;
+    }
+
+    return infoIterator->second;
+}
+
 size_t CIMG::GetSize()
 {
     m_stream.seekp (0, std::ios::end);

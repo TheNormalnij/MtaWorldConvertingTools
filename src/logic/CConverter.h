@@ -43,6 +43,7 @@ private:
     bool LoadModWaterData();
     bool LoadModPhysicalInfo();
 
+    void RemoveBrokenModels();
     void RemoveLods();
     void ReorderLods();
     void FilterUnusedModels();

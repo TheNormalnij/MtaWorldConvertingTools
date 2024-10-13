@@ -1,5 +1,5 @@
 #include "convertors.h"
-#include "math.h"
+#include <cmath>
 
 constexpr double radToDeg = (180.0/3.141592653589793238463);
 
