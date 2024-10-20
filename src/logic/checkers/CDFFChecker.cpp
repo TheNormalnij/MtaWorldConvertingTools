@@ -2,10 +2,11 @@
 
 #include <array>
 
-const std::array<uint32_t, 3> GTASA_DFF_VERSIONS = {
+const std::array<uint32_t, 4> GTASA_DFF_VERSIONS = {
     0x1803FFFF,
     0x0324FFFF,
     0x1003FFFF,
+    0x0800FFFF,
 };
 
 bool CDFFChecker::Check()
