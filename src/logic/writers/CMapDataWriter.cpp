@@ -3,6 +3,7 @@
 void CMapDataWriter::Write()
 {
     Printf("-- Generated with converter version 3.0\nreturn {\n");
+    WriteModelInfoMap();
     WriteModelsInfo();
 
     WriteMapInfo();
@@ -148,8 +149,6 @@ void CMapDataWriter::WriteModelsInfo()
         fileMap[m_pIMG->GetFileInfo(index)->szFileName.GetLowerString()] = index;
     }
 
-    Printf("\t\tatomic = {\n");
-
     // { id, dffPos, txdPos, colPos, drawDistance, flags }
     for (const auto &def : *m_atomic) {
         const std::string modelName = def.modelName.GetLowerString();
@@ -157,7 +156,7 @@ void CMapDataWriter::WriteModelsInfo()
         const bool hasCol = colPos.contains(modelName);
         const std::string colStr = hasCol ? std::to_string(colPos[modelName]) : "nil";
 
-        Printf("\t\t\t{ %d, %d, %d, %s, %d, %d };\n",
+        Printf("\t\t{ %d, %d, %d, %s, %d, %d };\n",
                def.modelId,
                fileMap[modelName + ".dff"],
                fileMap[txdName + ".txd"],
@@ -167,10 +166,6 @@ void CMapDataWriter::WriteModelsInfo()
                );
     }
 
-    Printf("\t\t};\n");
-
-    Printf("\t\ttimed = {\n");
-
     // { id, dffPos, txdPos, colPos, drawDistance, flags, timeOn, timeOff }
     for (const auto &def : *m_timed) {
         const std::string modelName = def.modelName.GetLowerString();
@@ -178,7 +173,7 @@ void CMapDataWriter::WriteModelsInfo()
         const bool hasCol = colPos.contains(modelName);
         const std::string colStr = hasCol ? std::to_string(colPos[modelName]) : "nil";
 
-        Printf("\t\t\t{ %d, %d, %d, %s, %d, %d, %d, %d };\n",
+        Printf("\t\t{ %d, %d, %d, %s, %d, %d, %d, %d };\n",
                def.modelId,
                fileMap[modelName + ".dff"],
                fileMap[txdName + ".txd"],
@@ -190,10 +185,6 @@ void CMapDataWriter::WriteModelsInfo()
                );
     }
 
-    Printf("\t\t};\n");
-
-    Printf("\t\tclump = {\n");
-
     // { id, dffPos, txdPos, colPos, drawDistance, flags }
     for (const auto &def : *m_clump) {
         const std::string modelName = def.modelName.GetLowerString();
@@ -201,7 +192,7 @@ void CMapDataWriter::WriteModelsInfo()
         const bool hasCol = colPos.contains(modelName);
         const std::string colStr = hasCol ? std::to_string(colPos[modelName]) : "nil";
 
-        Printf("\t\t\t{ %d, %d, %d, %s, %d, %d };\n",
+        Printf("\t\t{ %d, %d, %d, %s, %d, %d };\n",
                def.modelId,
                fileMap[modelName + ".dff"],
                fileMap[txdName + ".txd"],
@@ -211,6 +202,31 @@ void CMapDataWriter::WriteModelsInfo()
                );
     }
 
-    Printf("\t\t};\n");
+    // { id, dffPos, txdPos, colPos, drawDistance, flags }
+    for (const auto &def : *m_damageable) {
+        const std::string modelName = def.modelName.GetLowerString();
+        const std::string txdName = def.texDictName.GetLowerString();
+        const bool hasCol = colPos.contains(modelName);
+        const std::string colStr = hasCol ? std::to_string(colPos[modelName]) : "nil";
+
+        Printf("\t\t{ %d, %d, %d, %s, %d, %d };\n",
+               def.modelId,
+               fileMap[modelName + ".dff"],
+               fileMap[txdName + ".txd"],
+               colStr.c_str(),
+               (uint32_t)def.drawDist,
+               (uint32_t)def.flags
+               );
+    }
+
     Printf("\t};\n");
+}
+
+void CMapDataWriter::WriteModelInfoMap()
+{
+    size_t atomicEnd = m_atomic->size();
+    size_t timedEnd = atomicEnd + m_timed->size();
+    size_t clumpEnd = timedEnd + m_clump->size();
+    size_t damageableEnd = timedEnd + m_damageable->size() + 1;
+    Printf("\tdefsmap = { atomic=%d, timed=%d, clump = %d, damageable=%d };\n", atomicEnd, timedEnd, clumpEnd, damageableEnd);
 }

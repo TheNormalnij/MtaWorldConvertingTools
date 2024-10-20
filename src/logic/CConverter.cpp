@@ -51,6 +51,8 @@ void CConverter::Convert()
             ReorderLods();
         }
 
+        SeparateDamageableAtomic();
+
         FilterUnusedModels();
 
         if (!OpenModIMGs()){
@@ -285,6 +287,7 @@ void CConverter::RemoveBrokenModels()
     filterBroken(m_atomic);
     filterBroken(m_timed);
     filterBroken(m_clump);
+    filterBroken(m_damageable);
 }
 
 void CConverter::RemoveLods()
@@ -353,6 +356,7 @@ void CConverter::FilterUnusedModels()
     filter(m_atomic);
     filter(m_timed);
     filter(m_clump);
+    filter(m_damageable);
 
     m_log->Verbose("Used models count: %d", usedSet.size());
 }
@@ -397,8 +401,7 @@ void CConverter::GenerateColLib()
     for (CIMG &img : m_modImgs) {
         for (const SImgFileInfo &fileInfo : img.GetFilesInfo()) {
             auto name = fileInfo.szFileName.GetLowerString();
-            // TODO end with
-            if (name.find(".col") == name.npos) {
+            if (name.ends_with(".col")) {
                 continue;
             }
 
@@ -445,6 +448,14 @@ void CConverter::GetUsedTxd(std::unordered_set<std::string> &out)
     filter(m_atomic);
     filter(m_timed);
     filter(m_clump);
+    filter(m_damageable);
+}
+
+void CConverter::SeparateDamageableAtomic()
+{
+    auto isDamageable = [](const SAtomicModelDef &def){ return (def.flags & 4096) != 0; };
+    std::copy_if(m_atomic.begin(), m_atomic.end(), std::back_inserter(m_damageable), isDamageable);
+    std::remove_if(m_atomic.begin(), m_atomic.end(), isDamageable);
 }
 
 void CConverter::ConvetMapInfoToMTA() {
@@ -467,6 +478,7 @@ void CConverter::ConvetMapInfoToMTA() {
     fill(m_atomic);
     fill(m_timed);
     fill(m_clump);
+    fill(m_damageable);
 
     m_mtaMap.resize(count);
     for (int i = 0; i < count; i++) {
@@ -503,6 +515,7 @@ void CConverter::ConvetMapInfoToMTA() {
     fixFlags(m_atomic);
     fixFlags(m_timed);
     fixFlags(m_clump);
+    fixFlags(m_damageable);
 }
 
 void CConverter::WriteIMGs()
@@ -572,6 +585,7 @@ void CConverter::WriteMapInfo()
     mapWriter.SetAtomic(&m_atomic);
     mapWriter.SetTimed(&m_timed);
     mapWriter.SetClump(&m_clump);
+    mapWriter.SetDamageable(&m_damageable);
 
     mapWriter.SetWater(&m_waterinfo);
     mapWriter.SetPhysicalInfo(&m_physical);

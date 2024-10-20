@@ -23,6 +23,7 @@ public:
     void SetAtomic(std::vector<SAtomicModelDef> *defs) { m_atomic = defs; };
     void SetTimed(std::vector<STimeModelDef> *defs) { m_timed = defs; };
     void SetClump(std::vector<SClumpModelDef> *defs) { m_clump = defs; };
+    void SetDamageable(std::vector<SAtomicModelDef> *defs) { m_damageable = defs; };
     void SetWater(std::vector<SWaterInfo> *water) { m_water = water; };
     void SetPhysicalInfo(SMTAPhysicalInfo *info) { m_physicalInfo = info; };
 private:
@@ -30,6 +31,7 @@ private:
     void WriteMapInfo();
     void WritePhysicalInfo();
     void WriteModelsInfo();
+    void WriteModelInfoMap();
 private:
     std::filesystem::path    m_path;
     std::vector<SMapObject> *m_pMapObjects;
@@ -39,7 +41,7 @@ private:
     std::vector<SAtomicModelDef> *m_atomic;
     std::vector<STimeModelDef>   *m_timed;
     std::vector<SClumpModelDef>  *m_clump;
-
+    std::vector<SAtomicModelDef> *m_damageable;
 
     std::vector<SWaterInfo> *m_water;
 

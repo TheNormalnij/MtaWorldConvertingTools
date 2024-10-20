@@ -55,6 +55,8 @@ private:
 
     void GetUsedTxd(std::unordered_set<std::string> &out);
 
+    void SeparateDamageableAtomic();
+
     void WriteIMGs();
     size_t WriteIMG();
     void WriteMapInfo();
@@ -72,6 +74,7 @@ private:
     std::vector<SGtaDatSection> m_modFiles;
 
     std::vector<SAtomicModelDef> m_atomic;
+    std::vector<SAtomicModelDef> m_damageable;
     std::vector<STimeModelDef> m_timed;
     std::vector<SClumpModelDef> m_clump;
 
