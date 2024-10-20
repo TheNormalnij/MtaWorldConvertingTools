@@ -8,7 +8,7 @@ enum class ELogLevel {
 };
 
 // From some point this is not a real interface class
-class ILogger
+class CAbstractLogger
 {
 public:
     void Verbose(const char* msg) { Log(ELogLevel::VERBOSE, msg); };

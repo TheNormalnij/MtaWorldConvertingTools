@@ -1,8 +1,10 @@
 
-#include "../logic/ILogger.h"
+#pragma once
+
+#include "../logic/CAbstractLogger.h"
 #include <QTextBrowser>
 
-class CGuiTextBrowsertLogger : public ILogger {
+class CGuiTextBrowsertLogger : public CAbstractLogger {
 public:
     CGuiTextBrowsertLogger(QTextBrowser *out): m_out(out) {};
 

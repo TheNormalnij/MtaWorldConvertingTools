@@ -15,7 +15,7 @@
 
 #include "CColLib.h"
 
-#include "ILogger.h"
+#include "CAbstractLogger.h"
 
 namespace fs = std::filesystem;
 
@@ -32,7 +32,7 @@ struct SConverterParams {
 class CConverter
 {
 public:
-    CConverter(ILogger *logger, SConverterParams *settings);
+    CConverter(CAbstractLogger *logger, SConverterParams *settings);
 
     void Convert();
 private:
@@ -68,7 +68,7 @@ private:
     void ConvetMapInfoToMTA();
 
 private:
-    ILogger *m_log;
+    CAbstractLogger *m_log;
     const SConverterParams m_settings;
 
     std::vector<SGtaDatSection> m_modFiles;

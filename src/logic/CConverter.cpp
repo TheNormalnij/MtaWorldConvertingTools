@@ -13,7 +13,7 @@
 
 namespace fs = std::filesystem;
 
-CConverter::CConverter(ILogger *logger, SConverterParams *settings): m_log(logger), m_settings(*settings) {
+CConverter::CConverter(CAbstractLogger *logger, SConverterParams *settings): m_log(logger), m_settings(*settings) {
 }
 
 void CConverter::Convert()
