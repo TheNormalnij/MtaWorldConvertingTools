@@ -401,7 +401,7 @@ void CConverter::GenerateColLib()
     for (CIMG &img : m_modImgs) {
         for (const SImgFileInfo &fileInfo : img.GetFilesInfo()) {
             auto name = fileInfo.szFileName.GetLowerString();
-            if (name.ends_with(".col")) {
+            if (!name.ends_with(".col")) {
                 continue;
             }
 
